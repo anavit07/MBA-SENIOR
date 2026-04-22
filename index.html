@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MBA_SENIOR_v3.1 [PAPER]</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap');
+
+:root {
+  --bg:     #f0ede8;
+  --s1:     #e8e4de;
+  --s2:     #ddd9d3;
+  --s3:     #d0ccc6;
+  --g:      #1a1a1a;
+  --g2:     #333333;
+  --g3:     #555555;
+  --gd:     #c0bbb4;
+  --text:   #1a1a1a;
+  --muted:  #888880;
+  --red:    #c0392b;
+  --gold:   #7a5c00;
+  --blue:   #1a5276;
+  --border: #c4c0b8;
+  --acc:    #2c3e50;
+  --acc2:   #1a2530;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:'JetBrains Mono','Courier New',monospace;
+  background:var(--bg);color:var(--text);font-size:13px;line-height:1.5;
+  background-image:
+    linear-gradient(rgba(0,0,0,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,0,0,.03) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+
+/* subtle paper texture */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at 20% 50%,rgba(255,255,255,.15) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 20%,rgba(255,255,255,.1) 0%,transparent 50%);
+}
+
+#app{
+  max-width:480px;margin:0 auto;height:100%;
+  display:flex;flex-direction:column;position:relative;z-index:1;
+  border-left:1px solid var(--border);border-right:1px solid var(--border);
+  box-shadow:0 0 40px rgba(0,0,0,.12);
+}
+
+/* SCREENS */
+.screen{display:none;flex:1;flex-direction:column;overflow-y:auto;overflow-x:hidden;padding-bottom:56px}
+.screen.active{display:flex;animation:boot .15s ease}
+@keyframes boot{from{opacity:0}to{opacity:1}}
+
+/* TOPBAR */
+.topbar{
+  background:var(--acc2);border-bottom:2px solid var(--acc);
+  padding:9px 14px;display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.brand{color:#e8e4de;font-size:13px;letter-spacing:1px}
+.brand span{color:#7a8a9a;font-size:10px}
+.top-right{display:flex;align-items:center;gap:10px}
+.blink{animation:blink 1s step-end infinite;color:#b0c4d8}
+@keyframes blink{50%{opacity:0}}
+.xp-badge{font-size:10px;color:#a0b4c8;letter-spacing:.5px}
+
+/* NAV */
+.nav{
+  position:absolute;bottom:0;left:0;right:0;
+  background:var(--acc2);border-top:2px solid var(--acc);
+  display:flex;z-index:50;
+}
+.nav-btn{
+  flex:1;padding:9px 2px 12px;background:none;border:none;border-right:1px solid var(--acc);
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;
+  color:#5a7a94;font-size:8px;letter-spacing:.5px;text-transform:uppercase;
+  font-family:'JetBrains Mono','Courier New',monospace;transition:all .15s;
+}
+.nav-btn:last-child{border-right:none}
+.nav-btn .ni{font-size:15px}
+.nav-btn.active{color:#e8e4de;background:rgba(255,255,255,.08);box-shadow:inset 0 -2px 0 #b0c4d8}
+
+/* ═══════════ DASHBOARD ═══════════ */
+.term-line{padding:5px 14px;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--s2)}
+.term-line span{color:var(--acc)}
+
+.dash-hero{padding:14px;background:var(--acc2);border:none;margin:12px 14px 0;border-radius:2px}
+.dh-cmd{font-size:10px;color:#5a7a94;margin-bottom:6px}
+.dh-h1{font-size:18px;color:#e8e4de;letter-spacing:.5px;margin-bottom:4px;font-weight:700}
+.dh-sub{font-size:10px;color:#7a8a9a;letter-spacing:.5px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:10px 14px}
+.stat-box{background:var(--s1);border:1px solid var(--border);padding:10px 4px;text-align:center}
+.stat-n{display:block;font-size:20px;color:var(--acc);line-height:1;font-weight:700}
+.stat-l{display:block;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+
+.xp-bar-wrap{margin:0 14px 10px;background:var(--s1);border:1px solid var(--border);padding:10px 12px}
+.xp-bar-label{display:flex;justify-content:space-between;margin-bottom:6px;font-size:10px;color:var(--muted)}
+.xp-bar-label span{color:var(--acc);font-weight:500}
+.xp-bar{height:5px;background:var(--s3);border:1px solid var(--border)}
+.xp-fill{height:100%;background:var(--acc);transition:width .5s}
+
+.term-alerts{padding:0 14px 6px}
+.t-alert{
+  background:var(--s1);border:1px solid var(--border);border-left:3px solid var(--acc);
+  padding:11px 13px;margin-bottom:7px;cursor:pointer;
+  display:flex;align-items:center;gap:12px;transition:all .15s;
+}
+.t-alert:active{background:var(--s2)}
+.t-alert.gold{border-left-color:var(--gold)}
+.ta-icon{font-size:18px;flex-shrink:0}
+.ta-info{flex:1}
+.ta-t{font-size:12px;margin-bottom:2px;font-weight:500}
+.ta-t.green{color:var(--acc)}
+.ta-t.gold{color:var(--gold)}
+.ta-s{font-size:9px;color:var(--muted)}
+.ta-arr{color:var(--muted);font-size:14px}
+
+.sec-cmd{padding:12px 14px 6px;font-size:10px;color:var(--muted)}
+.sec-cmd::before{content:'$ ';color:var(--g3)}
+
+.cat-list{padding:0 14px 10px;display:flex;flex-direction:column;gap:6px}
+.cat-item{
+  background:var(--s1);border:1px solid var(--border);
+  border-left:3px solid var(--c,var(--acc));
+  padding:12px 13px;display:flex;align-items:center;gap:11px;
+  cursor:pointer;transition:all .15s;
+}
+.cat-item:active{background:var(--s2)}
+.cat-em{font-size:18px;flex-shrink:0}
+.cat-info{flex:1;min-width:0}
+.cat-name{font-size:13px;color:var(--text);margin-bottom:2px;font-weight:500}
+.cat-sub{font-size:9px;color:var(--muted);letter-spacing:.3px}
+.bar{height:2px;background:var(--s3);margin-top:6px;overflow:hidden}
+.bar-fill{height:100%;background:var(--acc);transition:width .5s}
+.pct{font-size:10px;color:var(--muted);flex-shrink:0}
+.pct.done{color:var(--acc);font-weight:500}
+
+/* ═══════════ STUDY ═══════════ */
+.card-nav{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--s1)}
+.back-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:4px}
+.back-btn::before{content:'‹ ';color:var(--g3)}
+.card-prog{font-size:10px;color:var(--muted)}
+
+.study-card{margin:10px 14px;background:#fff;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.sc-top{
+  padding:8px 12px;background:var(--acc2);border-bottom:none;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.sc-mentor{font-size:10px;color:#a0b4c8;letter-spacing:.5px}
+.sc-cat{font-size:9px;color:#5a7a94}
+.sc-body{padding:16px 14px}
+.sc-title{font-size:16px;color:var(--acc2);margin-bottom:11px;line-height:1.3;font-weight:700}
+.sc-quote{
+  padding:10px 12px;background:#f8f6f2;
+  border-left:3px solid var(--acc);margin-bottom:13px;
+  font-size:11px;color:var(--g2);line-height:1.65;font-style:italic;
+}
+.sc-quote cite{display:block;margin-top:5px;font-style:normal;font-size:9px;color:var(--muted)}
+.sc-content{font-size:12px;line-height:1.8;color:var(--g2)}
+.sc-content p{margin-bottom:9px}
+
+.kp-wrap{margin:0 14px;padding:12px 0;border-top:1px solid var(--border)}
+.kp-label{font-size:9px;color:var(--acc);letter-spacing:2px;text-transform:uppercase;margin-bottom:9px;font-weight:700}
+.kp-label::before{content:'// '}
+.kp{display:flex;align-items:flex-start;gap:8px;margin-bottom:7px;font-size:11px;line-height:1.55}
+.kp-dot{color:var(--acc);flex-shrink:0;font-size:10px;margin-top:2px;font-weight:700}
+
+.apply-box{margin:0 14px 8px;padding:11px 13px;background:#eef3f8;border:1px solid #c8d8e8;border-left:3px solid var(--blue)}
+.apply-label{font-size:9px;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:700}
+.apply-label::before{content:'>> '}
+.apply-text{font-size:11px;line-height:1.65;color:var(--g2)}
+
+.study-actions{display:flex;gap:7px;padding:10px 14px}
+.btn{flex:1;padding:11px;border:1px solid var(--border);background:var(--s1);cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;letter-spacing:.5px;text-transform:uppercase;color:var(--g2);transition:all .15s}
+.btn:active{opacity:.7}
+.btn-g{background:var(--acc2);color:#e8e4de;border-color:var(--acc2);font-weight:700}
+.btn-g:active{background:var(--acc)}
+.btn-gold{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+/* ═══════════ TEACH ═══════════ */
+.teach-prompt{margin:10px 14px 8px;background:#fff;border:1px solid var(--border);border-left:3px solid var(--acc);padding:13px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.tp-label{font-size:9px;color:var(--acc);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px;font-weight:700}
+.tp-label::before{content:'>> '}
+.tp-q{font-size:13px;line-height:1.4;color:var(--text)}
+.teach-hint{padding:0 14px 8px;font-size:10px;color:var(--muted);line-height:1.6}
+.teach-ta{
+  width:calc(100% - 28px);margin:0 14px;
+  background:#fff;border:1px solid var(--border);
+  padding:12px 13px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;
+  resize:none;height:160px;outline:none;transition:border-color .2s;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.06);
+}
+.teach-ta:focus{border-color:var(--acc)}
+.teach-ta::placeholder{color:var(--muted);font-style:italic}
+.wc{text-align:right;padding:4px 14px 2px;font-size:10px;color:var(--muted)}
+.fb-box{margin:8px 14px 0;padding:13px;background:var(--s1);border:1px solid var(--border);display:none}
+.fb-box.show{display:block;animation:boot .2s ease}
+.fb-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px}
+.fb-score{font-size:28px;color:var(--acc2);margin-bottom:7px;font-weight:700}
+.fb-text{font-size:11px;line-height:1.65}
+.fb-tip{margin-top:8px;padding:8px 11px;background:#eef3f8;border-left:2px solid var(--blue);font-size:10px;line-height:1.6;color:var(--g3)}
+
+/* ═══════════ REVIEW ═══════════ */
+.flip-wrap{margin:10px 14px;perspective:1200px;cursor:pointer;min-height:240px}
+.flip-inner{position:relative;transition:transform .45s cubic-bezier(.4,0,.2,1);transform-style:preserve-3d;min-height:240px}
+.flip-wrap.flipped .flip-inner{transform:rotateY(180deg)}
+.flip-face{background:#fff;border:1px solid var(--border);padding:22px 18px;backface-visibility:hidden;-webkit-backface-visibility:hidden;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.flip-back{position:absolute;top:0;left:0;right:0;bottom:0;transform:rotateY(180deg);overflow-y:auto}
+.ff-label{font-size:9px;color:var(--acc);letter-spacing:2px;text-transform:uppercase;margin-bottom:13px;font-weight:700}
+.ff-label::before{content:'>> '}
+.ff-q{font-size:15px;line-height:1.4;color:var(--text)}
+.ff-hint{margin-top:16px;font-size:9px;color:var(--muted);letter-spacing:1px}
+
+.rating-area{padding:12px 14px;display:none}
+.rating-area.show{display:block}
+.rl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;text-align:center}
+.rbts{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.rbt{padding:10px 4px;border:1px solid var(--border);background:var(--s1);cursor:pointer;text-align:center;transition:all .15s;font-family:'JetBrains Mono',monospace}
+.rbt:active{transform:scale(.96)}
+.rbt .re{font-size:17px;display:block;margin-bottom:3px}
+.rbt .rl2{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.3px}
+.rbt.r1.sel{border-color:var(--red);background:rgba(192,57,43,.08)}
+.rbt.r2.sel{border-color:#c0620a;background:rgba(192,98,10,.08)}
+.rbt.r3.sel{border-color:var(--blue);background:rgba(26,82,118,.08)}
+.rbt.r4.sel{border-color:var(--acc);background:rgba(44,62,80,.08)}
+
+.rev-done{display:none;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;text-align:center;gap:12px}
+.rev-done.show{display:flex}
+.rd-icon{font-size:40px}
+.rd-title{font-size:18px;color:var(--acc2);font-weight:700}
+.rd-sub{font-size:10px;color:var(--muted);line-height:1.7}
+.btn-center{margin-top:6px;padding:12px 24px;background:var(--acc2);color:#e8e4de;border:none;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.5px;text-transform:uppercase;cursor:pointer}
+.btn-center:active{opacity:.8}
+
+/* ═══════════════════════════════
+          QUIZ SCREEN
+═══════════════════════════════ */
+.quiz-header{padding:10px 14px;background:var(--s1);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.quiz-title{font-size:12px;color:var(--gold);font-weight:700}
+.quiz-title::before{content:'$ '}
+.quiz-meta{font-size:10px;color:var(--muted)}
+
+/* INTRO */
+.quiz-intro{display:flex;flex-direction:column;padding:14px;gap:12px}
+.qi-icon{font-size:40px;text-align:center}
+.qi-h{font-size:17px;color:var(--acc2);text-align:center;font-weight:700}
+.qi-h::before{content:'$ '}
+.qi-sub{font-size:11px;color:var(--muted);line-height:1.7;text-align:center}
+.qi-rules{background:var(--s1);border:1px solid var(--border);padding:12px;display:flex;flex-direction:column;gap:7px}
+.qi-rule{display:flex;gap:8px;font-size:11px;line-height:1.5;color:var(--g2)}
+.qi-rule::before{content:'[+]';color:var(--acc);flex-shrink:0;font-weight:700}
+.btn-quiz-start{width:100%;padding:13px;background:var(--acc2);color:#e8e4de;border:none;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;font-weight:700}
+.btn-quiz-start:active{opacity:.8}
+#quiz-last-score{font-size:10px;color:var(--muted);text-align:center;display:none}
+
+/* QUESTION */
+.quiz-body{padding:12px 14px;display:none}
+.quiz-body.show{display:block;animation:boot .15s ease}
+.q-prog-wrap{margin-bottom:14px}
+.q-prog-label{display:flex;justify-content:space-between;margin-bottom:5px;font-size:10px;color:var(--muted)}
+.q-prog-label span{color:var(--acc);font-weight:500}
+.q-prog-bar{height:4px;background:var(--s3);border:1px solid var(--border)}
+.q-prog-fill{height:100%;background:var(--acc);transition:width .4s}
+
+.q-cat{display:inline-block;font-size:9px;color:var(--gold);letter-spacing:1.5px;text-transform:uppercase;border:1px solid rgba(122,92,0,.3);background:rgba(122,92,0,.06);padding:2px 8px;margin-bottom:10px;font-weight:500}
+.q-text{font-size:14px;line-height:1.5;color:var(--text);margin-bottom:14px;font-weight:500}
+.q-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.q-opt{
+  padding:11px 13px;background:#fff;border:1px solid var(--border);
+  cursor:pointer;font-size:12px;line-height:1.4;
+  display:flex;align-items:center;gap:11px;transition:all .15s;
+  font-family:'JetBrains Mono',monospace;color:var(--text);
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.q-opt:active{opacity:.8}
+.q-opt.selected{border-color:var(--gold);background:rgba(122,92,0,.04)}
+.q-opt.correct{border-color:var(--acc);background:rgba(44,62,80,.06);pointer-events:none}
+.q-opt.wrong{border-color:var(--red);background:rgba(192,57,43,.06);pointer-events:none}
+.q-opt.disabled{pointer-events:none;opacity:.55}
+.q-opt-key{
+  width:22px;height:22px;border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--muted);flex-shrink:0;transition:all .15s;
+}
+.q-opt.selected .q-opt-key{border-color:var(--gold);color:var(--gold)}
+.q-opt.correct .q-opt-key{border-color:var(--acc);color:var(--acc);background:rgba(44,62,80,.1);font-weight:700}
+.q-opt.wrong .q-opt-key{border-color:var(--red);color:var(--red);background:rgba(192,57,43,.1)}
+
+.q-feedback{padding:11px 13px;border:1px solid var(--border);margin-bottom:10px;font-size:11px;line-height:1.65;display:none}
+.q-feedback.show{display:block;animation:boot .15s ease}
+.q-feedback.cfb{border-color:rgba(44,62,80,.4);background:rgba(44,62,80,.05);border-left:3px solid var(--acc)}
+.q-feedback.wfb{border-color:rgba(192,57,43,.3);background:rgba(192,57,43,.05);border-left:3px solid var(--red)}
+.q-feedback b{display:block;margin-bottom:4px;font-size:12px}
+.q-feedback b.c{color:var(--acc2)}
+.q-feedback b.w{color:var(--red)}
+.btn-next-q{width:100%;padding:12px;background:var(--acc2);color:#e8e4de;border:none;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;font-weight:700;display:none;margin-bottom:14px}
+.btn-next-q.show{display:block}
+.btn-next-q:active{opacity:.8}
+
+/* RESULT */
+.quiz-result{display:none;flex-direction:column;align-items:center;padding:20px 14px;text-align:center;gap:13px}
+.quiz-result.show{display:flex;animation:boot .2s ease}
+.qr-score-wrap{position:relative;width:120px;height:120px}
+.qr-score-wrap svg{width:120px;height:120px;transform:rotate(-90deg)}
+.qr-c-bg{fill:none;stroke:var(--s3);stroke-width:7}
+.qr-c-fill{fill:none;stroke:var(--gold);stroke-width:7;stroke-linecap:round;stroke-dasharray:283;stroke-dashoffset:283;transition:stroke-dashoffset 1s ease}
+.qr-score-text{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.qr-n{display:block;font-size:28px;color:var(--gold);line-height:1;font-weight:700}
+.qr-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.qr-h{font-size:16px;color:var(--acc2);font-weight:700}
+.qr-msg{font-size:11px;color:var(--muted);line-height:1.7;max-width:280px}
+.qr-bd{background:var(--s1);border:1px solid var(--border);padding:13px;width:100%;text-align:left}
+.qr-bd-title{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;font-weight:500}
+.qr-bd-title::before{content:'// '}
+.qr-bd-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;font-size:11px}
+.qr-bd-row:last-child{margin-bottom:0}
+.qr-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-left:3px}
+.qr-dot.c{background:var(--acc)}
+.qr-dot.w{background:var(--red)}
+.qr-actions{display:flex;gap:6px;width:100%}
+.btn-retry{flex:1;padding:12px;background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;text-transform:uppercase;letter-spacing:.5px}
+.btn-retry:active{opacity:.8}
+
+/* ═══════════ SETTINGS ═══════════ */
+.sett-s{padding:14px}
+.sett-title{font-size:15px;color:var(--acc2);margin-bottom:16px;font-weight:700}
+.sett-title::before{content:'$ ';color:var(--g3)}
+.sett-label{font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:block}
+.sett-input{width:100%;background:#fff;border:1px solid var(--border);padding:10px 12px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:11px;outline:none;transition:border-color .2s;margin-bottom:6px}
+.sett-input:focus{border-color:var(--acc)}
+.sett-hint{font-size:10px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+.sett-btn{width:100%;padding:11px;background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:10px;cursor:pointer;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;transition:all .2s}
+.sett-btn:hover{border-color:var(--acc);color:var(--acc)}
+.sett-btn.danger{border-color:rgba(192,57,43,.4);color:var(--red)}
+.sync-st{font-size:10px;text-align:center;min-height:13px;margin-top:4px}
+.divider{height:1px;background:var(--border);margin:14px 0}
+.app-ver{font-size:9px;color:var(--muted);text-align:center;line-height:2}
+
+/* TOAST */
+.toast{position:fixed;bottom:64px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--acc2);border:none;color:#e8e4de;padding:7px 16px;font-size:10px;opacity:0;transition:all .25s;pointer-events:none;z-index:9000;white-space:nowrap;max-width:calc(100vw - 28px);text-align:center;letter-spacing:.5px;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.typing{overflow:hidden;white-space:nowrap;animation:type .5s steps(20,end)}
+@keyframes type{from{width:0}to{width:100%}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="brand">MBA_SENIOR_v3.1 <span class="blink">█</span></div>
+    <div class="top-right">
+      <div class="xp-badge" id="top-xp">XP:0</div>
+      <div class="xp-badge" id="top-level" style="color:var(--gold)">LVL:1</div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD ══ -->
+  <div class="screen active" id="screen-dash">
+    <div class="term-line">ROOT@MBA_SENIOR:~$ <span>status --all</span></div>
+    <div class="dash-hero">
+      <div class="dh-cmd">// SISTEMA DE APRENDIZADO EXECUTIVO</div>
+      <div class="dh-h1">&gt; ARQUITETO<br>DE NEGÓCIOS</div>
+      <div class="dh-sub">STRATEGY · MARKETING · FINANCE · LEADERSHIP · OPS</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box"><span class="stat-n" id="s-streak">0</span><span class="stat-l">Streak</span></div>
+      <div class="stat-box"><span class="stat-n" id="s-mastered">0</span><span class="stat-l">Dom.</span></div>
+      <div class="stat-box"><span class="stat-n" id="s-due">0</span><span class="stat-l">Revisar</span></div>
+      <div class="stat-box"><span class="stat-n" id="s-quiz" style="font-size:16px">--</span><span class="stat-l">Quiz%</span></div>
+    </div>
+
+    <div class="xp-bar-wrap">
+      <div class="xp-bar-label"><span id="xp-label">XP: 0 / 500</span><span id="level-name">RECRUTA</span></div>
+      <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+    </div>
+
+    <div class="term-alerts" id="alert-wrap"></div>
+    <div class="sec-cmd">load --modules</div>
+    <div class="cat-list" id="cat-list"></div>
+  </div>
+
+  <!-- ══ STUDY ══ -->
+  <div class="screen" id="screen-study">
+    <div class="card-nav">
+      <button class="back-btn" onclick="goBack('dash')">Início</button>
+      <span class="card-prog" id="study-prog"></span>
+    </div>
+    <div id="study-card-wrap"></div>
+    <div id="study-kp"></div>
+    <div id="study-apply"></div>
+    <div class="study-actions">
+      <button class="btn" onclick="goTeach()">TEACH</button>
+      <button class="btn btn-g" id="btn-next" onclick="nextCard()">NEXT &gt;</button>
+    </div>
+  </div>
+
+  <!-- ══ TEACH ══ -->
+  <div class="screen" id="screen-teach">
+    <div class="card-nav">
+      <button class="back-btn" onclick="goBackToStudy()">Voltar</button>
+      <span class="card-prog">FEYNMAN PROTOCOL</span>
+    </div>
+    <div class="teach-prompt">
+      <div class="tp-label">Desafio executivo</div>
+      <div class="tp-q" id="teach-q"></div>
+    </div>
+    <div class="teach-hint">// Explique como num board meeting: direto, com dados e exemplos reais.</div>
+    <textarea class="teach-ta" id="teach-ta" placeholder="Apresente sua análise executiva aqui...&#10;&#10;Use frameworks, dados e exemplos reais de mercado..."></textarea>
+    <div class="wc" id="wc">0 palavras</div>
+    <div class="fb-box" id="fb-box">
+      <div class="fb-label">// AVALIAÇÃO DO BOARD</div>
+      <div class="fb-score" id="fb-score"></div>
+      <div class="fb-text" id="fb-text"></div>
+      <div class="fb-tip" id="fb-tip"></div>
+    </div>
+    <div style="display:flex;gap:7px;padding:10px 14px">
+      <button class="btn" onclick="clearTeach()">CLEAR</button>
+      <button class="btn btn-g" onclick="submitTeach()">SUBMIT ✓</button>
+    </div>
+  </div>
+
+  <!-- ══ REVIEW ══ -->
+  <div class="screen" id="screen-review">
+    <div class="card-nav">
+      <button class="back-btn" onclick="goBack('dash')">Sair</button>
+      <span class="card-prog" id="rev-prog"></span>
+    </div>
+    <div class="flip-wrap" id="flip-wrap" onclick="flipCard()">
+      <div class="flip-inner">
+        <div class="flip-face flip-front">
+          <div class="ff-label">Query</div>
+          <div class="ff-q" id="rev-q"></div>
+          <div class="ff-hint">// TAP TO EXECUTE_RESPONSE</div>
+        </div>
+        <div class="flip-face flip-back"><div id="rev-ans"></div></div>
+      </div>
+    </div>
+    <div class="rating-area" id="rating-area">
+      <div class="rl">// RATE RESPONSE</div>
+      <div class="rbts">
+        <div class="rbt r1" onclick="rateCard(1)"><span class="re">💀</span><span class="rl2">FAIL</span></div>
+        <div class="rbt r2" onclick="rateCard(2)"><span class="re">⚡</span><span class="rl2">HARD</span></div>
+        <div class="rbt r3" onclick="rateCard(3)"><span class="re">✅</span><span class="rl2">GOOD</span></div>
+        <div class="rbt r4" onclick="rateCard(4)"><span class="re">🔥</span><span class="rl2">EASY</span></div>
+      </div>
+    </div>
+    <div class="rev-done" id="rev-done">
+      <div class="rd-icon">⚡</div>
+      <div class="rd-title">&gt; REVISÃO_COMPLETA</div>
+      <div class="rd-sub">// Sinapses atualizadas. Próxima sessão calculada pelo algoritmo SM-2.</div>
+      <button class="btn-center" onclick="navigate('dash')">&lt; RETURN_HOME</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+          QUIZ SCREEN
+  ══════════════════════════════ -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-header">
+      <div class="quiz-title">QUIZ_EXECUTIVO</div>
+      <div class="quiz-meta" id="quiz-meta">20 queries</div>
+    </div>
+
+    <div class="quiz-intro" id="quiz-intro">
+      <div class="qi-icon">🏆</div>
+      <div class="qi-h">EXECUTIVE ASSESSMENT</div>
+      <div class="qi-sub">20 questões de alta pressão cobrindo todos os módulos do MBA. Responda como um executivo sênior.</div>
+      <div class="qi-rules">
+        <div class="qi-rule">4 alternativas · 1 correta · feedback imediato</div>
+        <div class="qi-rule">Placar em tempo real + análise por módulo</div>
+        <div class="qi-rule">XP ganho por acerto · Progresso salvo</div>
+        <div class="qi-rule">Questões embaralhadas a cada tentativa</div>
+      </div>
+      <div id="quiz-last-score"></div>
+      <button class="btn-quiz-start" onclick="startQuiz()">EXECUTE_QUIZ.exe →</button>
+    </div>
+
+    <div class="quiz-body" id="quiz-body">
+      <div class="q-prog-wrap">
+        <div class="q-prog-label"><span id="q-num">Q1/20</span><span id="q-score-live">✓0 ✗0</span></div>
+        <div class="q-prog-bar"><div class="q-prog-fill" id="q-pfill"></div></div>
+      </div>
+      <div class="q-cat" id="q-cat"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="q-opts" id="q-opts"></div>
+      <div class="q-feedback" id="q-feedback"></div>
+      <button class="btn-next-q" id="btn-next-q" onclick="nextQuestion()">NEXT_QUERY →</button>
+    </div>
+
+    <div class="quiz-result" id="quiz-result">
+      <div class="qr-score-wrap">
+        <svg viewBox="0 0 100 100">
+          <circle class="qr-c-bg" cx="50" cy="50" r="45"/>
+          <circle class="qr-c-fill" id="qr-circle" cx="50" cy="50" r="45"/>
+        </svg>
+        <div class="qr-score-text">
+          <span class="qr-n" id="qr-n">0%</span>
+          <span class="qr-l">SCORE</span>
+        </div>
+      </div>
+      <div class="qr-h" id="qr-h"></div>
+      <div class="qr-msg" id="qr-msg"></div>
+      <div class="qr-bd" id="qr-bd"></div>
+      <div class="qr-actions">
+        <button class="btn-retry" onclick="resetQuiz()">↺ RETRY</button>
+        <button class="btn-center" onclick="navigate('dash')" style="flex:1">&lt; HOME</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ SETTINGS ══ -->
+  <div class="screen" id="screen-settings">
+    <div class="sett-s">
+      <div class="sett-title">CONFIG</div>
+      <label class="sett-label">Webhook n8n → Google Sheets</label>
+      <input class="sett-input" id="n8n-url" type="url" placeholder="https://n8n.app/webhook/...">
+      <div class="sett-hint">// Sincroniza XP, progresso e resultados do quiz automaticamente.</div>
+      <button class="sett-btn" onclick="saveSettings()">SAVE_CONFIG</button>
+      <div class="sync-st" id="sync-st"></div>
+      <div class="divider"></div>
+      <button class="sett-btn" onclick="syncNow()">↑ SYNC_NOW</button>
+      <div class="divider"></div>
+      <button class="sett-btn danger" onclick="resetAll()">⚠ RESET_ALL_DATA</button>
+      <div class="divider"></div>
+      <div class="app-ver">
+        MBA_SENIOR_v3.0 [TERMINAL EDITION]<br>
+        Porter · Drucker · Kotler · Dalio · Jobs<br>
+        SM-2 Algorithm · localStorage · n8n sync<br>
+        <span style="color:var(--g)">STATUS: OPERATIONAL</span>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" id="nav-dash" onclick="navigate('dash')"><span class="ni">⚡</span><span>HOME</span></button>
+    <button class="nav-btn" id="nav-study" onclick="navigate('study')"><span class="ni">📖</span><span>STUDY</span></button>
+    <button class="nav-btn" id="nav-review" onclick="navigate('review')"><span class="ni">🔁</span><span>REVIEW</span></button>
+    <button class="nav-btn" id="nav-quiz" onclick="navigate('quiz')"><span class="ni">🏆</span><span>QUIZ</span></button>
+    <button class="nav-btn" id="nav-settings" onclick="navigate('settings')"><span class="ni">⚙</span><span>SYS</span></button>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ╔══════════════════════════════════════════════════════╗
+// ║                    CARDS DATABASE                    ║
+// ╚══════════════════════════════════════════════════════╝
+const CARDS = [
+
+  // ── ESTRATÉGIA ──────────────────────────────────────
+  {
+    id:'str-01', category:'Estratégia', emoji:'♟️', color:'#2c3e50',
+    mentor:'Michael Porter',
+    title:'As 5 Forças de Porter — Análise competitiva definitiva',
+    quote:'"A essência da formulação estratégica é lidar com a competição."',
+    quoteAuthor:'Michael Porter',
+    summary:'Framework para analisar a atratividade e competitividade de qualquer indústria.',
+    content:`As 5 Forças de Porter é o framework mais utilizado em análise de mercado no mundo corporativo. Desenvolvido em 1979, define a rentabilidade de uma indústria pela soma de 5 pressões competitivas.
+
+As 5 forças: (1) Rivalidade entre concorrentes existentes — quanto mais intensa, menor a margem. (2) Ameaça de novos entrantes — barreiras de entrada protegem margens. (3) Poder de barganha dos fornecedores — fornecedor com poder único cobra mais. (4) Poder de barganha dos compradores — cliente concentrado pressiona preço. (5) Ameaça de produtos substitutos — alternativas colocam teto no preço.
+
+Aplicação executiva: o objetivo da estratégia é posicionar a empresa onde as forças são mais fracas, ou construir posições que as tornem irrelevantes. Apple construiu um ecossistema que neutraliza todas as 5 forças simultaneamente.`,
+    keyPoints:[
+      'Indústria com todas as 5 forças fracas = alta rentabilidade estrutural',
+      'Estratégia é sobre escolher onde NÃO competir tanto quanto onde competir',
+      'Barreiras de entrada: escala, capital, marca, regulação, patentes, rede',
+      'Porter vs. Blue Ocean: Porter analisa oceanos vermelhos — Kim cria novos',
+      'Aplicação: redesenhe a análise a cada 2 anos — forças mudam com o mercado',
+    ],
+    apply:'Escolha seu setor. Mapeie as 5 forças de 1 a 5 em intensidade. Some. Score acima de 20 = indústria difícil. Identifique a força mais intensa e desenvolva uma estratégia específica para neutralizá-la.',
+    question:'Quais são as 5 Forças de Porter, como elas determinam a rentabilidade de uma indústria e como uma empresa pode se posicionar para neutralizá-las?'
+  },
+  {
+    id:'str-02', category:'Estratégia', emoji:'♟️', color:'#2c3e50',
+    mentor:'Michael Porter',
+    title:'Vantagem Competitiva Sustentável — As 3 estratégias genéricas',
+    quote:'"Ser tudo para todos é uma receita para a mediocridade estratégica."',
+    quoteAuthor:'Michael Porter',
+    summary:'As três posições estratégicas que geram vantagem competitiva duradoura.',
+    content:`Porter identificou que empresas sustentavelmente rentáveis adotam uma das três estratégias genéricas — e que empresas "stuck in the middle" (sem posição clara) são cronicamente medianas.
+
+Liderança em custo: ser o produtor de menor custo da indústria. Requer escala, eficiência operacional e controle obsessivo de despesas. Walmart, Ryanair, Xiaomi. Risco: guerra de preços que erode margens de todos.
+
+Diferenciação: oferecer algo percebido como único que justifica prêmio de preço. Apple, BMW, Hermès. O custo da diferenciação deve ser menor que o prêmio cobrado. Risco: imitação pelos concorrentes.
+
+Foco (nicho): concentrar em segmento específico com liderança em custo ou diferenciação dentro dele. Ferrari (foco + diferenciação). Risco: segmento pode diminuir ou a concorrência pode invadir.
+
+O erro fatal: tentar ser simultaneamente o mais barato E o mais diferenciado sem tecnologia disruptiva que mude a fronteira custo-valor.`,
+    keyPoints:[
+      '"Stuck in the middle": sem posição clara = ROI cronicamente abaixo da média',
+      'Liderança em custo exige escala — funciona mal para empresa pequena sem nicho',
+      'Diferenciação não é só produto — pode ser marca, serviço, canal, experiência',
+      'IKEA é excepcional: foco em custo E diferenciação via design democrático',
+      'Vantagem sustentável: difícil de imitar, rara, valiosa e insubstituível (framework VRIO)',
+    ],
+    apply:'Defina em uma frase qual é a posição estratégica da sua empresa ou área. Se não conseguir, você está "stuck in the middle". Identifique os 3 concorrentes mais ameaçadores e avalie qual é a posição deles — e onde há espaço não ocupado.',
+    question:'Quais são as 3 estratégias genéricas de Porter e por que empresas "stuck in the middle" têm performance cronicamente inferior?'
+  },
+  {
+    id:'str-03', category:'Estratégia', emoji:'♟️', color:'#2c3e50',
+    mentor:'Clayton Christensen',
+    title:'Inovação Disruptiva — Por que líderes de mercado falham',
+    quote:'"As empresas bem geridas fracassam precisamente por serem bem geridas."',
+    quoteAuthor:'Clayton Christensen',
+    summary:'O mecanismo que explica por que tecnologias inferiores desbancam líderes estabelecidos.',
+    content:`Clayton Christensen, professor de Harvard, identificou o "Dilema do Inovador": empresas líderes são destruídas por inovações que inicialmente parecem inferiores e irrelevantes para seus clientes premium.
+
+O mecanismo: um entrante começa com tecnologia mais simples e barata, atendendo clientes que os líderes ignoram (overserved ou non-consumers). Melhora incrementalmente até que a tecnologia é boa o suficiente para os clientes do líder — mas a preço dramaticamente menor.
+
+Casos: discos rígidos (cada geração menor desbancou a anterior), Netflix vs. Blockbuster (streaming parecia inferior ao DVD), iPhone vs. Nokia (smartphone parecia brinquedo em 2007), Tesla vs. montadoras tradicionais.
+
+A armadilha racional: os líderes continuam investindo no que clientes atuais (e mais lucrativos) pedem. É a decisão correta no curto prazo — e fatal no longo. A solução: unidades separadas para inovações disruptivas, protegidas da lógica do negócio principal.`,
+    keyPoints:[
+      'Inovação sustentadora: melhora produtos para clientes existentes — líderes ganham',
+      'Inovação disruptiva: começa inferior mas cria novo mercado — líderes perdem',
+      'Jobs To Be Done: consumidores "contratam" produtos para realizar tarefas — foco nisso',
+      'Unidade separada: a única forma de incumbentes sobreviverem à disrupção',
+      'Sinal de disrupção: concorrente novo com produto "pior" mas mais barato crescendo',
+    ],
+    apply:'Mapeie sua indústria: existe alguém oferecendo algo "pior" mas muito mais barato, atendendo clientes que você ignora? Se sim, monitore mensalmente o crescimento deles. Essa empresa pode ser a sua Kodak.',
+    question:'O que é inovação disruptiva segundo Christensen, por que líderes de mercado são vulneráveis a ela e como empresas incumbentes podem se proteger?'
+  },
+
+  // ── MARKETING ───────────────────────────────────────
+  {
+    id:'mkt-01', category:'Marketing', emoji:'📡', color:'#1a5276',
+    mentor:'Philip Kotler',
+    title:'Marketing 4.0 — Da transação à transformação',
+    quote:'"Marketing não é a arte de vender o que você faz. É a arte de saber o que fazer."',
+    quoteAuthor:'Philip Kotler',
+    summary:'A evolução do marketing de produto para propósito, na era da hiperconectividade.',
+    content:`Philip Kotler identificou a evolução do marketing em fases: 1.0 (foco no produto — era industrial), 2.0 (foco no consumidor — satisfação), 3.0 (foco em valores — propósito humano), 4.0 (digital + humano — integração online-offline).
+
+O framework dos 4Ps continua relevante mas insuficiente. Kotler adiciona dimensões: People (quem serve), Process (como entrega), Physical Evidence (prova física), Programs (marketing integrado), Performance (resultados mensuráveis).
+
+Customer Journey e os 5As: Aware (consciente) → Appeal (atração) → Ask (pesquisa) → Act (compra) → Advocate (defesa). O objetivo do marketing moderno é maximizar advogados — não apenas compradores. NPS (Net Promoter Score) mede isso.
+
+Brand advocacy é o ativo mais valioso da era digital: um consumidor que defende espontaneamente uma marca tem custo de aquisição zero e credibilidade que nenhum anúncio compra.`,
+    keyPoints:[
+      'STP: Segmentação → Targeting → Positioning — fundamento de qualquer estratégia',
+      'CLV (Customer Lifetime Value): quanto um cliente vale no total — base do budget de aquisição',
+      'CAC (Customer Acquisition Cost): quanto custa adquirir um cliente — CLV/CAC >3 = saudável',
+      'Brand equity: valor financeiro da marca — Nike vale mais que seus ativos físicos',
+      '5As: Aware → Appeal → Ask → Act → Advocate — mapeie onde você perde clientes',
+    ],
+    apply:'Calcule o CLV e CAC do seu produto ou serviço. Se CLV/CAC < 3, sua economia de aquisição está comprometida. Identifique em qual dos 5As você perde mais clientes e foque 80% do esforço de marketing nesse gargalo.',
+    question:'O que são os 5As de Kotler, como eles substituem o funil tradicional e o que significa CLV/CAC acima de 3 para a saúde do marketing?'
+  },
+  {
+    id:'mkt-02', category:'Marketing', emoji:'📡', color:'#1a5276',
+    mentor:'Seth Godin',
+    title:'Marketing de Permissão e o conceito de Marca Notável',
+    quote:'"As pessoas não compram bens e serviços. Elas compram relações, histórias e magia."',
+    quoteAuthor:'Seth Godin',
+    summary:'Por que interrupção perdeu para permissão e como criar algo que vale a pena espalhar.',
+    content:`Seth Godin identificou a morte do marketing de interrupção (TV, banners, cold calls) e a ascensão do marketing de permissão: a audiência concede permissão para ser comunicada porque quer receber o conteúdo.
+
+Livro "Vaca Roxa": em estrada com vacas marrons, uma vaca roxa chamaria atenção. Produtos mediocres, mesmo com marketing agressivo, fracassam. Produtos ou ideias notáveis (remarkable = worth remarking about) se espalham sozinhos.
+
+Tribu e lideres de tribu: antes de anunciar, identifique sua tribo — pessoas com visão de mundo compartilhada que estão esperando um líder. Marketing moderno é liderar tribos, não atingir demografias.
+
+Content marketing como permissão: ao oferecer conteúdo de valor genuíno, você constrói audiência que concede permissão. HubSpot construiu negócio de bilhões atraindo compradores — não perseguindo-os.`,
+    keyPoints:[
+      'Marketing de permissão: audiência quer receber sua mensagem — oposto de spam',
+      'Vaca Roxa: produtos notáveis geram WOM (word of mouth) orgânico',
+      'Tribu: grupo com crença compartilhada buscando liderança — seja o líder delas',
+      'Content marketing: atrair compradores com valor real, não perseguir com anúncio',
+      'Mínimo Produto Viável de Marketing: o menor esforço que ainda seja notável',
+    ],
+    apply:'Identifique sua tribo: quem são as 100 pessoas que, se amassem seu produto, garantiriam o sucesso? Crie conteúdo exclusivamente para elas. Esqueça escala por enquanto — profundidade de conexão gera advocacy mais que alcance.',
+    question:'O que é marketing de permissão versus interrupção, o que é "vaca roxa" de Seth Godin e como o conceito de tribo redefine estratégia de marketing?'
+  },
+
+  // ── FINANÇAS CORPORATIVAS ────────────────────────────
+  {
+    id:'fin-01', category:'Finanças', emoji:'💹', color:'#7a5c00',
+    mentor:'Warren Buffett',
+    title:'Valuation — Como precificar qualquer negócio',
+    quote:'"Preço é o que você paga. Valor é o que você recebe."',
+    quoteAuthor:'Warren Buffett',
+    summary:'Os métodos fundamentais para determinar o valor real de uma empresa ou ativo.',
+    content:`Valuation é a arte e ciência de determinar o valor intrínseco de um negócio. É a base de toda decisão de M&A, investimento, captação e venda de empresa.
+
+DCF (Discounted Cash Flow): projeta os fluxos de caixa livres futuros e traz a valor presente usando o WACC (custo médio ponderado de capital) como taxa de desconto. É o método mais rigoroso — e mais sensível a premissas. Fórmula simplificada: Valor = FCF/(WACC - g), onde g é crescimento perpétuo.
+
+Múltiplos comparáveis: avalia a empresa usando múltiplos de empresas similares (EV/EBITDA, P/E, P/S). Mais rápido e pragmático que DCF. EV/EBITDA de 8x significa que o mercado paga 8 vezes o EBITDA anual pela empresa.
+
+Buffett e o valor intrínseco: desconto dos fluxos de caixa futuros em taxa livre de risco. Compra apenas quando preço de mercado está significativamente abaixo do valor intrínseco — a margem de segurança de Graham.
+
+EBITDA como proxy de caixa operacional: Earnings Before Interest, Taxes, Depreciation and Amortization. Remove efeitos de estrutura de capital e contabilidade para comparar rentabilidade operacional.`,
+    keyPoints:[
+      'WACC = custo do capital próprio × % equity + custo da dívida × (1-IR) × % dívida',
+      'EV (Enterprise Value) = Market Cap + Dívida Líquida — valor total da empresa',
+      'EV/EBITDA médio global: 8-12x para empresas maduras; 20-40x para tech em crescimento',
+      'Margem de segurança: compre quando preço < 70% do valor intrínseco (Graham)',
+      'Terminal Value representa 70-80% do DCF — premissas de crescimento perpétuo são críticas',
+    ],
+    apply:'Para qualquer empresa que você analisa: calcule o EV/EBITDA atual e compare com o setor. Se estiver abaixo da média sem razão fundamental, pode estar subvalorizada. Se acima, o mercado precifica crescimento — valide se esse crescimento é sustentável.',
+    question:'O que é DCF, como o WACC funciona como taxa de desconto e por que a margem de segurança de Buffett/Graham é fundamental em qualquer valuation?'
+  },
+  {
+    id:'fin-02', category:'Finanças', emoji:'💹', color:'#7a5c00',
+    mentor:'Ray Dalio',
+    title:'Gestão de Risco e Princípios de Alocação de Capital',
+    quote:'"Diversificação é o único almoço grátis no investimento."',
+    quoteAuthor:'Ray Dalio',
+    summary:'Como os maiores gestores do mundo pensam sobre risco, correlação e alocação de capital.',
+    content:`Ray Dalio, fundador da Bridgewater Associates (o maior hedge fund do mundo), sistematizou princípios de gestão de risco que se tornaram referência global.
+
+All Weather Portfolio: carteira desenhada para performar em qualquer regime econômico (crescimento, recessão, inflação, deflação). Alocação: 30% ações, 40% títulos longos, 15% títulos intermediários, 7,5% ouro, 7,5% commodities. Baseia-se em correlação negativa entre ativos.
+
+Risk Parity: aloca capital de forma que cada ativo contribua igual quantidade de risco, não de capital. Permite diversificação real, não apenas de classes de ativos mas de fontes de risco.
+
+O princípio da Ciclo de Dívida: Dalio mapeou que a economia opera em ciclos de dívida de curto prazo (5-8 anos) e longo prazo (75-100 anos). Compreender em qual ponto do ciclo você está define a estratégia de alocação.
+
+Capital allocation para empresas: retorno sobre capital alocado (ROIC) > WACC = criação de valor. Abaixo disso, a empresa destrói valor mesmo dando lucro contábil.`,
+    keyPoints:[
+      'ROIC > WACC: única condição para criação real de valor econômico',
+      'Correlação, não diversificação de nomes: 20 ações do mesmo setor = risco concentrado',
+      'Margem de segurança na empresa: caixa suficiente para 12 meses sem receita nova',
+      'FCL (Fluxo de Caixa Livre) = EBITDA - Capex - Variação de Capital de Giro',
+      'Alavancagem: amplifica retorno e risco — Dívida/EBITDA acima de 4x é zona de risco',
+    ],
+    apply:'Calcule o ROIC do seu negócio ou área: lucro operacional líquido de impostos ÷ capital investido. Compare com o custo de capital (WACC ou taxa mínima de atratividade). Se ROIC < custo de capital, a empresa está destruindo valor independente do lucro.',
+    question:'O que é ROIC, por que ROIC > WACC é a condição necessária para criação de valor e como Ray Dalio pensa sobre correlação versus diversificação?'
+  },
+
+  // ── LIDERANÇA ────────────────────────────────────────
+  {
+    id:'ldr-01', category:'Liderança', emoji:'🎯', color:'#8b0000',
+    mentor:'Simon Sinek',
+    title:'O Golden Circle — Por que líderes inspiradores começam pelo Porquê',
+    quote:'"As pessoas não compram o que você faz. Elas compram por que você faz."',
+    quoteAuthor:'Simon Sinek',
+    summary:'O framework neurológico que explica por que alguns líderes e empresas inspiram e outros não.',
+    content:`Simon Sinek identificou que líderes e empresas inspiradoras pensam, agem e comunicam de forma radicalmente diferente dos outros: de dentro para fora, começando pelo Porquê.
+
+O Golden Circle: Porquê (purpose/causa/crença) → Como (processo/valores/diferenciais) → O quê (produto/resultado/oferta). A maioria das empresas comunica de fora para dentro: "aqui está nosso produto, aqui estão as funcionalidades, compre."
+
+Neurologia: o Porquê fala ao sistema límbico (emocional, decisório, sem capacidade de linguagem racional). O Quê fala ao neocórtex (racional, analítico). Decisões de compra e de seguir um líder são emocionais, racionalizadas depois.
+
+Apple comunica: "Desafiamos o status quo. Acreditamos em pensar diferente. Fazemos computadores bonitos e simples. Quer comprar um?" Nokia comunicava: "Fazemos ótimos celulares. Com design bonito. Quer comprar um?" A diferença é o Porquê.
+
+Liderança: líderes que comunicam Porquê atraem seguidores que acreditam no mesmo. Empregados motivados por salário são mercenários. Líderes inspiram crença.`,
+    keyPoints:[
+      'Golden Circle: Porquê → Como → O quê — inverter é comunicar como a maioria',
+      'Sistema límbico: decide → neocórtex: justifica. Lidere pelo sistema límbico',
+      'Lei da difusão da inovação: 2,5% inovadores + 13,5% early adopters = massa crítica',
+      'Propósito não é lucro — lucro é resultado de servir o Porquê com excelência',
+      'Líderes vs. managers: managers gerem sistemas; líderes inspiram pessoas',
+    ],
+    apply:'Escreva o Porquê da sua empresa ou área em uma frase que não mencione produto, serviço ou lucro. Teste: se você lesse para um desconhecido, ele iria querer saber mais? Se não, refine até que cause essa reação.',
+    question:'O que é o Golden Circle de Simon Sinek, por que começar pelo Porquê cria mais engajamento do que pelo O quê e como isso se relaciona com neurologia da decisão?'
+  },
+  {
+    id:'ldr-02', category:'Liderança', emoji:'🎯', color:'#8b0000',
+    mentor:'Jim Collins',
+    title:'Liderança Nível 5 e os princípios das empresas excelentes',
+    quote:'"Empresas mediocres têm líderes brilhantes. Empresas excelentes têm líderes que desenvolvem outros líderes."',
+    quoteAuthor:'Jim Collins',
+    summary:'O que diferencia empresas de desempenho duradouro das medianas — e o perfil dos líderes que constroem isso.',
+    content:`Jim Collins e sua equipe pesquisaram por 5 anos empresas que fizeram a transição de boas para excelentes (Good to Great). A descoberta mais contraintuitiva: os CEOs das empresas mais bem-sucedidas eram humildes e silenciosos — não carismáticos e midiáticos.
+
+Liderança Nível 5: a hierarquia vai de Nível 1 (indivíduo altamente capaz) ao Nível 5 (líder de excelência executiva). O Nível 5 combina humildade pessoal extrema com vontade profissional feroz. Atribui sucesso à equipe e ao acaso; assume responsabilidade pelos fracassos.
+
+Conceito Ouriço (Hedgehog): empresas excelentes focam no cruzamento de 3 círculos: (1) no que podem ser os melhores do mundo, (2) no que as move profundamente (paixão), (3) no que move o motor econômico. Fora dessa interseção, dizem não.
+
+Cultura da disciplina: não é ter regras, é ter pessoas disciplinadas que não precisam de regras. Contrate caráter — treina-se habilidade, não se treina caráter.
+
+Tecnologia como acelerador: empresas excelentes usam tecnologia para acelerar momentum existente, não como solução para problemas estratégicos.`,
+    keyPoints:[
+      'Nível 5: humildade pessoal + vontade profissional feroz — combinação rara',
+      'Primeiro Quem, Depois O Quê: coloque as pessoas certas antes de definir a estratégia',
+      'BHAG (Big Hairy Audacious Goal): meta ousada e clara que une a organização',
+      'Flywheel (volante): momentum se constrói empurrando consistentemente, não em revoluções',
+      'Preserve o núcleo / estimule o progresso: valores imutáveis + práticas adaptáveis',
+    ],
+    apply:'Mapeie seu Conceito Ouriço pessoal: o que você pode ser melhor que qualquer um? O que te move profundamente? O que gera resultado econômico? A interseção é onde você deve concentrar 80% do seu tempo e energia.',
+    question:'O que define um líder de Nível 5 segundo Jim Collins, o que é o Conceito Ouriço e por que "Primeiro Quem, Depois O Quê" é contraintuitivo mas poderoso?'
+  },
+
+  // ── OPERAÇÕES E GESTÃO ───────────────────────────────
+  {
+    id:'ops-01', category:'Operações', emoji:'⚙️', color:'#1a5c2a',
+    mentor:'Taiichi Ohno',
+    title:'Lean Thinking — Eliminar desperdício para criar valor',
+    quote:'"Tudo que não agrega valor ao produto final é desperdício."',
+    quoteAuthor:'Taiichi Ohno',
+    summary:'O sistema Toyota que revolucionou produção e gestão ao eliminar os 7 tipos de desperdício.',
+    content:`O Sistema Toyota de Produção (TPS), desenvolvido por Taiichi Ohno, gerou o movimento Lean — hoje aplicado em manufatura, serviços, software e startups.
+
+Os 7 desperdícios (Muda): Superprodução (produzir mais que a demanda), Espera (tempo parado), Transporte (movimentação desnecessária de materiais), Superprocessamento (etapas sem valor), Estoque excessivo, Movimentação (de pessoas sem valor), Defeitos (retrabalho e sucata).
+
+Just-in-Time: produzir apenas o que é necessário, quando necessário, na quantidade necessária. Elimina estoque como "solução" para problemas de processo — o estoque mascara problemas.
+
+Jidoka (autonomação com toque humano): máquinas detectam defeitos e param automaticamente. Princípio: nunca passe um defeito adiante. Corrigir na origem é 10x mais barato que no final.
+
+Kaizen (melhoria contínua): pequenas melhorias diárias superam grandes revoluções esporádicas. Toyota gerou mais de 600.000 sugestões de melhoria de funcionários em um único ano.`,
+    keyPoints:[
+      'Value Stream Mapping: mapeie todo o fluxo de valor e identifique onde os 7 desperdícios ocorrem',
+      'Takt Time: ritmo de produção ditado pela demanda real do cliente',
+      'Kanban: sistema de sinalização visual que controla fluxo e limita WIP (work in progress)',
+      '5S: Seiri (selecionar) · Seiton (organizar) · Seiso (limpar) · Seiketsu (padronizar) · Shitsuke (sustentar)',
+      'OEE: Overall Equipment Effectiveness = Disponibilidade × Performance × Qualidade',
+    ],
+    apply:'Mapeie um processo crítico da sua área. Para cada etapa, classifique: agrega valor (cliente paga por isso?), necessária sem valor (regulatória, etc.) ou puro desperdício. Elimine a terceira categoria primeiro, minimize a segunda.',
+    question:'Quais são os 7 desperdícios do Lean, o que é Just-in-Time e como o Kaizen cria vantagem competitiva sustentável através de melhoria contínua?'
+  },
+  {
+    id:'ops-02', category:'Operações', emoji:'⚙️', color:'#1a5c2a',
+    mentor:'Peter Drucker',
+    title:'Gestão por Objetivos (MBO) e a eficácia executiva',
+    quote:'"Eficiência é fazer as coisas certo. Eficácia é fazer as coisas certas."',
+    quoteAuthor:'Peter Drucker',
+    summary:'O framework que criou a moderna gestão por resultados e define como executivos devem alocar seu tempo.',
+    content:`Peter Drucker é o pai da administração moderna. Seu livro "The Effective Executive" (1966) permanece o mais relevante sobre gestão pessoal de alta performance.
+
+MBO (Management by Objectives): gestão por objetivos alinha toda a organização em torno de metas cascateadas. O que não é medido não é gerenciado. Cada pessoa tem objetivos claros, quantificáveis e conectados à estratégia corporativa. Precursor do OKR do Google.
+
+As 5 práticas do executivo eficaz: (1) Gerencie seu tempo — o recurso mais escasso. (2) Foque na contribuição externa — o que o cliente recebe. (3) Construa sobre forças, não sobre fraquezas. (4) Concentre esforços nas áreas de maior resultado. (5) Tome decisões eficazes.
+
+Drucker e o propósito: "O propósito de um negócio é criar um cliente." Antes do shareholder value, antes do ESG, Drucker já apontava o cliente como única razão de existência de qualquer negócio.
+
+Inovação e empreendedorismo: Drucker identificou 7 fontes de inovação — sendo a mais confiável a mudança em percepção, não em fatos (quando a mesma realidade passa a ser vista diferente).`,
+    keyPoints:[
+      'OKR (Objectives and Key Results): evolução do MBO; objetivo inspirador + 3-5 KRs quantificáveis',
+      'Análise de tempo: agende-se filmando o que faz por 2 semanas — a maioria se surpreende',
+      'Drucker: "O que eu faço que, se não feito por mim, não seria feito por ninguém?"',
+      'Decisão eficaz: qual é o problema real (não o sintoma)? Quais as alternativas? Qual o pior cenário?',
+      'Gestão por exceção: só escalem problemas que não têm regra — o resto, defina regra',
+    ],
+    apply:'Escreva seus 3 OKRs para o próximo trimestre. Para cada Objetivo, defina 3 Key Results mensuráveis (com número). Compartilhe com sua liderança e revise semanalmente. Isso é gestão por resultados na prática.',
+    question:'O que é MBO de Drucker, como evoluiu para OKR e quais são as 5 práticas que definem um executivo eficaz segundo ele?'
+  },
+
+  // ── EMPREENDEDORISMO ─────────────────────────────────
+  {
+    id:'emp-01', category:'Empreendedorismo', emoji:'🚀', color:'#4a2780',
+    mentor:'Eric Ries',
+    title:'Lean Startup — Validar antes de construir',
+    quote:'"A única forma de vencer é aprender mais rápido do que qualquer outro."',
+    quoteAuthor:'Eric Ries',
+    summary:'O método científico para desenvolver negócios: construir hipóteses, testar, medir e aprender.',
+    content:`Eric Ries criou o método Lean Startup em resposta ao fracasso de startups que constroem produtos complexos sem validar se alguém quer comprá-los.
+
+O ciclo Build-Measure-Learn: construa o MVP mais simples possível → meça o que importa → aprenda com dados reais → pivote ou persevere. Repetir esse ciclo mais rápido que a concorrência é vantagem competitiva.
+
+MVP (Minimum Viable Product): não é produto inferior — é o menor experimento que testa a hipótese mais arriscada do negócio. Dropbox testou com um vídeo de 3 minutos antes de escrever uma linha de código. Airbnb começou alugando colchões no apartamento dos fundadores.
+
+Métricas de vaidade vs. métricas acionáveis: usuários registrados, pageviews, downloads são vaidade se não se correlacionam com receita e retenção. Métricas acionáveis: taxa de conversão, retenção D30, LTV, NPS.
+
+Pivot: mudança de estratégia mantendo a aprendizagem. Instagram pivotou de app de check-in (Burbn) para fotos. YouTube pivotou de app de encontros para vídeos gerais. O pivot disciplinado salva startups — o pivot emocional sem dados as mata.`,
+    keyPoints:[
+      'Hipótese de valor: o cliente precisa disso? (valide antes de construir)',
+      'Hipótese de crescimento: como novos clientes encontram o produto? (viral, pago, sticky)',
+      'Métricas Pirate (AARRR): Acquisition → Activation → Retention → Revenue → Referral',
+      'Runway: tempo até o caixa acabar. Abaixo de 6 meses, emergência estratégica',
+      'Product-Market Fit: quando 40%+ dos usuários responderiam "muito desapontados" se o produto acabasse',
+    ],
+    apply:'Identifique a hipótese mais arriscada do seu negócio ou ideia (a que, se falsa, mata tudo). Desenhe o menor experimento possível para testá-la em 2 semanas com menos de R$ 1.000. Execute. Os dados valem mais que qualquer análise prévia.',
+    question:'O que é o ciclo Build-Measure-Learn, como o MVP funciona como instrumento científico e o que diferencia métricas de vaidade de métricas acionáveis?'
+  },
+  {
+    id:'emp-02', category:'Empreendedorismo', emoji:'🚀', color:'#4a2780',
+    mentor:'Peter Thiel',
+    title:'De Zero a Um — Monopólios e o futuro dos negócios',
+    quote:'"Competição é para perdedores. Monopólios são para quem cria valor de verdade."',
+    quoteAuthor:'Peter Thiel',
+    summary:'Por que construir monopólios legítimos é o objetivo de qualquer negócio que cria valor real.',
+    content:`Peter Thiel, cofundador do PayPal e primeiro investidor externo do Facebook, argumenta em "De Zero a Um" que toda grande empresa é única — um monopólio no seu nicho de atuação.
+
+Competição perfeita destrói lucro: em mercados perfeitamente competitivos, preços convergem ao custo marginal e ninguém tem margem. Mercados monopolistas permitem preços acima do custo e investimento em inovação.
+
+Características de um monopólio legítimo: tecnologia proprietária (10x melhor, não 10% — menor que isso é incremental demais para importar), efeito de rede (cada usuário torna o produto mais valioso para todos — Facebook, Visa, WhatsApp), economia de escala (custo marginal próximo de zero — software), marca forte.
+
+Segredo de Thiel: toda grande empresa começa dominando um nicho pequeno. Amazon começou só com livros. Facebook só em Harvard. Conquistar 80% de um mercado pequeno é mais fácil e mais valioso que 1% de um mercado enorme.
+
+A pergunta de Thiel: "O que você acredita que é verdade e que quase ninguém concorda?" Respostas únicas apontam para oportunidades únicas.`,
+    keyPoints:[
+      'Monopólio ≠ ilegal: Google tem monopólio de buscas porque é 10x melhor, não por coerção',
+      'Efeito de rede: produto de rede sem massa crítica vale zero — com ela, cresce exponencialmente',
+      'Bundling e unbundling: ciclo eterno de criação de valor — agregar e desagregar serviços',
+      'Lei de potência nos VC: um investimento retorna mais que todos os outros somados',
+      'Distribuição é tão importante quanto produto — a maioria das startups ignora isso',
+    ],
+    apply:'Defina o nicho onde sua empresa ou produto é ou poderia ser o líder monopolístico. É pequeno o suficiente para dominar? É grande o suficiente para ser rentável? Construa para dominar o nicho primeiro — expansão vem depois.',
+    question:'Por que Thiel afirma que competição é para perdedores, quais são as 4 características de monopólios legítimos e por que começar em nicho pequeno é estratégia superior?'
+  },
+
+  // ── NEGOCIAÇÃO ───────────────────────────────────────
+  {
+    id:'neg-01', category:'Negociação', emoji:'🤝', color:'#1a5c2a',
+    mentor:'Roger Fisher',
+    title:'Negociação de Princípios — Método Harvard',
+    quote:'"Seja duro com o problema, suave com as pessoas."',
+    quoteAuthor:'Roger Fisher',
+    summary:'O framework de Harvard que separa posições de interesses para criar acordos duradouros.',
+    content:`Roger Fisher e William Ury desenvolveram no Projeto de Negociação de Harvard o método que revolucionou a teoria e prática de negociação: a negociação baseada em princípios.
+
+Os 4 princípios fundamentais: (1) Separe as pessoas do problema — o relacionamento é mais valioso que qualquer acordo. (2) Foque em interesses, não posições — posição é o que você pede, interesse é por que você pede. (3) Crie opções de ganho mútuo — expanda o bolo antes de dividir. (4) Use critérios objetivos — padrões independentes legitimam acordos.
+
+BATNA (Best Alternative to a Negotiated Agreement): a melhor alternativa que você tem se a negociação falhar. Quem tem melhor BATNA tem mais poder. Fortaleça seu BATNA antes de negociar.
+
+ZOPA (Zone of Possible Agreement): a sobreposição entre o mínimo do vendedor e o máximo do comprador. Se não há ZOPA, não há acordo possível — não force.
+
+Negociação âncora: o primeiro número oferecido âncora toda a negociação subsequente. Quem ancora primeiro e de forma ambiciosa (mas justificada) tende a obter acordos mais favoráveis.`,
+    keyPoints:[
+      'BATNA forte = poder de negociação real — fortaleça antes de sentar à mesa',
+      'Interesses × posições: "Quero a janela aberta" (posição) vs. "Preciso de ar fresco" (interesse)',
+      'Âncora: primeiro número define campo de negociação — seja ambicioso mas defensável',
+      'Silêncio é arma poderosa — quem fala primeiro após proposta perde vantagem',
+      'Concessões: faça-as em valor decrescente — sinaliza que você está chegando ao limite',
+    ],
+    apply:'Na próxima negociação, antes de entrar: defina seu BATNA, sua ancora ideal (ambiciosa mas defensável), e mapeie os interesses reais da outra parte (não apenas a posição declarada). Entre com 3 opções de estrutura de acordo — quem apresenta opções controla a negociação.',
+    question:'O que diferencia interesses de posições no Método Harvard, o que é BATNA e por que âncoras iniciais têm impacto desproporcional no resultado da negociação?'
+  },
+
+  // ── INOVAÇÃO ─────────────────────────────────────────
+  {
+    id:'ino-01', category:'Inovação', emoji:'💡', color:'#41b8ff',
+    mentor:'Steve Jobs',
+    title:'Design Thinking e a obsessão com a experiência do usuário',
+    quote:'"O design não é apenas aparência. O design é como funciona."',
+    quoteAuthor:'Steve Jobs',
+    summary:'O processo de inovação centrado no humano que gerou os produtos mais amados do mundo.',
+    content:`Steve Jobs foi o maior praticante de Design Thinking antes do método ter nome. Sua obsessão não era tecnologia — era a experiência completa do usuário com a tecnologia.
+
+Design Thinking (IDEO/d.school Stanford): Empatizar (entenda profundamente o usuário) → Definir (enquadre o problema real, não o sintoma) → Idealizar (gere muitas soluções divergentes) → Prototipar (construa rápido e barato) → Testar (com usuários reais, itere).
+
+O insight central: a maioria das empresas soluciona o problema declarado pelo cliente. Empresas excepcionais solucionam o problema que o cliente tem mas não consegue articular. Ford: "Se eu perguntasse ao cliente o que queria, ele teria dito um cavalo mais rápido."
+
+Jobs e a integração vertical: controlar hardware, software e serviços permite experiências perfeitas. O ecossistema Apple é inimitável porque nenhum concorrente controla toda a stack — e o custo de criar esse ecossistema é proibitivo.
+
+Simplicidade como estratégia: "Simplicidade é a forma máxima de sofisticação" (Da Vinci, citado por Jobs). Cada feature do iPhone que foi removida antes do lançamento gerou mais valor que qualquer feature adicionada.`,
+    keyPoints:[
+      '5 etapas: Empatizar → Definir → Idealizar → Prototipar → Testar (processo cíclico)',
+      'HMW (How Might We): enquadramento que abre possibilidades sem prescrever solução',
+      'Jobs-to-be-done: qual tarefa o usuário "contrata" seu produto para realizar?',
+      'Prototipagem: quanto mais barato e rápido o protótipo, mais iterações você pode fazer',
+      'Dogfooding: use seu próprio produto como cliente — Jobs testava o iPhone obsessivamente',
+    ],
+    apply:'Escolha um produto ou processo da sua área. Observe 5 usuários reais usando por 30 minutos cada sem intervir. Anote onde eles travam, onde frustram, o que dizem espontaneamente. Esses pontos definem o problema real a resolver.',
+    question:'Quais são as 5 etapas do Design Thinking, o que significa resolver o problema não declarado do cliente e como Jobs usou essa lógica para construir a Apple?'
+  },
+];
+
+// ╔══════════════════════════════════════════════════════╗
+// ║                  QUIZ QUESTIONS (20)                 ║
+// ╚══════════════════════════════════════════════════════╝
+const QUIZ = [
+  {cat:'Estratégia',q:'Qual das 5 Forças de Porter determina que novos concorrentes podem entrar e erodir as margens do setor?',opts:['Poder dos fornecedores','Ameaça de novos entrantes','Rivalidade entre existentes','Poder dos compradores'],ans:1,exp:'A "Ameaça de Novos Entrantes" avalia quão fácil é para novos competidores entrarem no setor. Quanto mais fracas as barreiras (escala, capital, patentes, marca), mais a ameaça corrói margens dos incumbentes.'},
+  {cat:'Estratégia',q:'Uma empresa que tenta ser simultaneamente a mais barata E a mais diferenciada sem tecnologia disruptiva está em qual situação segundo Porter?',opts:['Blue Ocean Strategy','Liderança em foco','Stuck in the middle','Monopólio de diferenciação'],ans:2,exp:'"Stuck in the middle" é o termo de Porter para empresas sem posição estratégica clara. Sem escala para liderar em custo e sem unicidade para justificar prêmio, têm ROI cronicamente abaixo da média do setor.'},
+  {cat:'Estratégia',q:'O que caracteriza uma Inovação Disruptiva segundo Clayton Christensen, ao contrário de uma inovação sustentadora?',opts:['É tecnologicamente superior desde o início','Começa inferior e mais barata, atendendo clientes que os líderes ignoram','Requer investimento muito maior que a inovação sustentadora','É desenvolvida exclusivamente por startups, nunca por incumbentes'],ans:1,exp:'A inovação disruptiva começa atendendo clientes overserved ou non-consumers com produto mais simples e barato. Os líderes a ignoram porque parece inferior. Gradualmente melhora até desbancar o incumbente — que perdeu a janela de resposta.'},
+  {cat:'Marketing',q:'No framework dos 5As de Kotler, qual etapa representa o maior ativo de marketing do século XXI?',opts:['Aware (Consciente)','Ask (Pesquisa)','Act (Compra)','Advocate (Defensor)'],ans:3,exp:'Advocate (Defensor) é a etapa mais valiosa: clientes que recomendam espontaneamente têm CAC zero e credibilidade superior a qualquer anúncio pago. O marketing moderno tem como meta maximizar advogados, não apenas compradores.'},
+  {cat:'Marketing',q:'Se o CLV (Customer Lifetime Value) de um cliente é R$ 1.200 e o CAC (Customer Acquisition Cost) é R$ 500, qual é a situação da economia de aquisição?',opts:['Excelente — CLV/CAC de 2,4x está acima do mínimo de 2x','Comprometida — CLV/CAC de 2,4x está abaixo do benchmark saudável de 3x','Crítica — CLV/CAC abaixo de 3x exige corte imediato de marketing','Aceitável para empresas em estágio inicial mas insustentável no longo prazo'],ans:1,exp:'CLV/CAC de 2,4x está abaixo do benchmark padrão de 3x considerado saudável pela maioria dos investidores e frameworks de SaaS. Significa que o retorno sobre aquisição não cobre adequadamente custos de estrutura e capital.'},
+  {cat:'Marketing',q:'Seth Godin descreve produtos que geram recomendação espontânea como qual conceito?',opts:['Vaca Preta','Vaca Roxa','Permission Marketing','Tribu Marketing'],ans:1,exp:'"Vaca Roxa" é o conceito de Seth Godin para produtos ou ideias notáveis (remarkable = worth remarking about). Em uma estrada com vacas marrons, uma vaca roxa chama atenção. Produtos mediocres, mesmo com marketing caro, não se espalham organicamente.'},
+  {cat:'Finanças',q:'No método DCF (Discounted Cash Flow), qual taxa é usada para trazer os fluxos de caixa futuros a valor presente?',opts:['Taxa Selic','ROI esperado','WACC (Custo Médio Ponderado de Capital)','TIR (Taxa Interna de Retorno)'],ans:2,exp:'O WACC (Weighted Average Cost of Capital) é a taxa de desconto no DCF porque representa o custo de oportunidade do capital para os investidores — tanto equity quanto dívida. Fluxos de caixa descontados ao WACC mostram se o negócio cria valor acima do custo do capital.'},
+  {cat:'Finanças',q:'Quando o ROIC (Return on Invested Capital) de uma empresa é menor que o WACC, o que isso significa economicamente?',opts:['A empresa é rentável mas ineficiente operacionalmente','A empresa destrói valor mesmo se tiver lucro contábil positivo','A empresa está subcapitalizada e precisa de aporte','O múltiplo EV/EBITDA está sobreavaliado pelo mercado'],ans:1,exp:'ROIC < WACC significa que o retorno gerado pelo capital investido é menor que o custo desse capital. A empresa destrói valor econômico — mesmo que o lucro contábil seja positivo, os acionistas estariam melhor alocando o capital em outra alternativa.'},
+  {cat:'Finanças',q:'Warren Buffett compra ações apenas quando o preço de mercado está significativamente abaixo do valor intrínseco. Como esse conceito é chamado?',opts:['Alpha de mercado','Margem de segurança','Desconto de fluxo de caixa','Beta de risco'],ans:1,exp:'A "Margem de Segurança" vem de Benjamin Graham e é o princípio central de Buffett: comprar ativos com desconto significativo (geralmente 30%+) em relação ao valor intrínseco calculado. Essa margem protege contra erros de avaliação e eventos inesperados.'},
+  {cat:'Liderança',q:'O Golden Circle de Simon Sinek sugere que líderes inspiradores comunicam começando por qual elemento?',opts:['O Quê (produto/resultado)','Como (processo/diferenciais)','Porquê (propósito/crença)','Quem (público-alvo)'],ans:2,exp:'Líderes e empresas inspiradoras começam pelo Porquê — sua crença e propósito — e comunicam de dentro para fora. Isso fala ao sistema límbico (emocional e decisório). A maioria comunica de fora para dentro (produto → funcionalidades → preço), falando apenas ao neocórtex racional.'},
+  {cat:'Liderança',q:'O que caracteriza um líder de Nível 5 na hierarquia de Jim Collins?',opts:['Alta visibilidade pública e carisma excepcional como porta-voz da empresa','Humildade pessoal extrema combinada com vontade profissional feroz','Especialização técnica profunda no negócio principal da empresa','Habilidade de networking e relacionamento com stakeholders externos'],ans:1,exp:'O paradoxo do Nível 5: os líderes mais eficazes são os menos midiáticos. Combinam humildade pessoal (atribuem sucesso à equipe, assumem responsabilidade pelos fracassos) com determinação feroz na execução. Darwin Smith (Kimberly-Clark) é o arquétipo de Collins.'},
+  {cat:'Liderança',q:'O Conceito Ouriço de Jim Collins define o foco estratégico ideal como a interseção de 3 círculos. Quais são eles?',opts:['Tecnologia, mercado e capital disponível','O que pode ser o melhor, o que gera paixão e o que move o motor econômico','Produto, distribuição e preço','Missão, visão e valores organizacionais'],ans:1,exp:'O Conceito Ouriço é a interseção de: (1) no que a empresa pode ser a melhor do mundo — não a mais ambiciosa, a melhor; (2) o que a move profundamente — paixão genuína; (3) o que move o motor econômico — o único KPI que, se melhorado, mais impacta o resultado. Fora dessa interseção, disciplina é dizer não.'},
+  {cat:'Operações',q:'No Sistema Toyota de Produção, qual dos 7 desperdícios (Muda) é considerado o mais grave por mascarar todos os outros problemas do processo?',opts:['Transporte desnecessário','Defeitos e retrabalho','Superprodução','Estoque excessivo'],ans:2,exp:'A Superprodução é o desperdício mais grave para Taiichi Ohno porque gera ou amplifica todos os outros: cria estoque (desperdício 5), exige transporte (3), ocupa espaço e capital, e esconde gargalos e defeitos que o estoque mascara. Just-in-Time é o antídoto direto.'},
+  {cat:'Operações',q:'A diferença fundamental entre eficiência e eficácia, segundo Drucker, é:',opts:['Eficiência foca em resultado; eficácia em processo','Eficiência é fazer as coisas certas; eficácia é fazer as coisas corretamente','Eficiência é fazer as coisas certo (como); eficácia é fazer as coisas certas (o quê)','São sinônimos em gestão moderna'],ans:2,exp:'Drucker é categórico: "Eficiência é fazer certo as coisas; eficácia é fazer as coisas certas." Uma empresa pode ser altamente eficiente fazendo algo que não deveria estar fazendo. Eficácia é a prioridade — escolher as atividades corretas. Depois, eficiência ao executá-las.'},
+  {cat:'Empreendedorismo',q:'No método Lean Startup de Eric Ries, o MVP (Minimum Viable Product) tem como objetivo principal:',opts:['Lançar o produto mais rápido possível para ganhar mercado','Testar a hipótese mais arriscada do negócio com o menor esforço possível','Reduzir custos de desenvolvimento ao mínimo para preservar caixa','Apresentar aos investidores uma versão funcional do produto'],ans:1,exp:'O MVP é um instrumento científico, não um produto inferior. Seu objetivo é testar a hipótese mais crítica (a que, se falsa, inviabiliza o negócio) com o menor investimento possível. Dropbox testou com vídeo antes de escrever código. O aprendizado validado é o produto do MVP.'},
+  {cat:'Empreendedorismo',q:'Peter Thiel afirma que monopólios são o objetivo de qualquer grande empresa. Qual das opções abaixo é uma característica de monopólio legítimo?',opts:['Dominar 15-20% de um mercado grande de forma estável','Efeito de rede onde cada usuário torna o produto mais valioso para todos','Alta barreira regulatória que impede a entrada de novos competidores','Ser o primeiro a chegar num mercado (first mover advantage)'],ans:1,exp:'Efeito de rede é uma das 4 características de monopólio legítimo segundo Thiel (com tecnologia 10x superior, economia de escala e marca). WhatsApp, Visa e Facebook têm efeito de rede: o produto vale zero sem usuários, mas cresce exponencialmente com massa crítica.'},
+  {cat:'Negociação',q:'No Método Harvard de Negociação, o que é BATNA e por que ele é a principal fonte de poder numa negociação?',opts:['Melhor preço disponível no mercado — define o teto da negociação','Melhor alternativa ao acordo negociado — define até onde você pode conceder','Meta interna antes de revelar sua posição real','Proposta de abertura que âncora o campo de negociação'],ans:1,exp:'BATNA (Best Alternative to a Negotiated Agreement) é o que você fará se a negociação falhar. Quem tem BATNA forte nunca precisa aceitar acordo ruim. Antes de qualquer negociação importante, fortaleça ativamente sua BATNA — isso aumenta seu poder sem mudar sua posição.'},
+  {cat:'Negociação',q:'No Método Harvard, qual princípio fundamental distingue posições de interesses?',opts:['Posição é o preço pedido; interesse é a taxa de desconto aceitável','Posição é o que você declara querer; interesse é a razão real por trás disso','Posição é definida antes da negociação; interesse emerge durante','Posição é do lado vendedor; interesse é do lado comprador'],ans:1,exp:'"Quero a janela aberta" é posição. "Preciso de ar fresco" é interesse. Focar em interesses abre soluções criativas invisíveis quando se negocia posição versus posição. Muitas vezes dois lados têm interesses compatíveis — mas posições opostas que parecem incompatíveis.'},
+  {cat:'Inovação',q:'No Design Thinking, qual é a etapa mais importante e frequentemente negligenciada que define a qualidade de toda a solução subsequente?',opts:['Prototipagem — construir rapidamente para testar','Idealização — gerar muitas soluções divergentes sem julgamento','Empatia — compreender profundamente o usuário antes de definir o problema','Teste — validar com usuários reais iterativamente'],ans:2,exp:'Empatia é a fundação do Design Thinking. A maioria resolve o problema declarado — o Design Thinking busca o problema real, frequentemente diferente do que o usuário articula. Observar, entrevistar e imergir na realidade do usuário é o que diferencia soluções transformadoras de soluções medianas.'},
+  {cat:'Inovação',q:'Steve Jobs disse que Ford teria dado ao cliente "um cavalo mais rápido" se tivesse perguntado. Qual princípio de inovação esse exemplo ilustra?',opts:['Que pesquisa de mercado é inútil e deve ser substituída por intuição do fundador','Que inovação radical requer resolver o problema não declarado, que o usuário tem mas não consegue articular','Que velocidade de entrega (cavalo mais rápido) é sempre o fator mais valorizado pelo cliente','Que inovação de produto deve ignorar concorrência e focar apenas em tecnologia'],ans:1,exp:'O exemplo ilustra que usuários articulam soluções dentro do paradigma que conhecem. Inovação transformadora resolve o problema subjacente (mobilidade mais rápida) com solução que transcende o paradigma existente (automóvel). Jobs aplicava isso obsessivamente: o iPhone resolveu o problema de convergência que ninguém tinha verbalizado.'},
+];
+
+// ╔══════════════════════════════════════════════════════╗
+// ║                    XP SYSTEM                         ║
+// ╚══════════════════════════════════════════════════════╝
+const XP_LEVELS=[
+  {name:'RECRUTA',min:0,max:499},
+  {name:'ANALISTA',min:500,max:1499},
+  {name:'GERENTE',min:1500,max:2999},
+  {name:'DIRETOR',min:3000,max:5999},
+  {name:'VP',min:6000,max:9999},
+  {name:'C-LEVEL',min:10000,max:19999},
+  {name:'ARQUITETO',min:20000,max:Infinity},
+];
+function getLevel(xp){return XP_LEVELS.find(l=>xp>=l.min&&xp<=l.max)||XP_LEVELS[0];}
+
+// ╔══════════════════════════════════════════════════════╗
+// ║                      STATE                           ║
+// ╚══════════════════════════════════════════════════════╝
+const SK='mba_senior_v3';
+let ST={cards:{},streak:0,lastDate:null,n8nUrl:'',totalReviewed:0,xp:0,quizBest:0,quizHistory:[]};
+let studyCat=null,studyQ=[],studyIdx=0;
+let revQ=[],revIdx=0,flipped=false;
+let quizOrder=[],quizIdx=0,quizCorrect=0,quizWrong=0,quizCatRes={};
+
+function loadST(){
+  try{const r=localStorage.getItem(SK);if(r)Object.assign(ST,JSON.parse(r));}catch(e){}
+  CARDS.forEach(c=>{if(!ST.cards[c.id])ST.cards[c.id]={interval:1,ease:2.5,nextRev:Date.now(),reps:0,lastRev:null,explanation:'',studied:false};});
+}
+function saveST(){
+  try{localStorage.setItem(SK,JSON.stringify(ST));}catch(e){}
+  if(ST.n8nUrl)syncN8n(false);
+}
+function addXP(n){ST.xp+=n;saveST();updateXPBar();toast(`+${n} XP`);}
+
+// ─── N8N ─────────────────────────────────────────────
+async function syncN8n(loud=true){
+  if(!ST.n8nUrl){if(loud)setSyncSt('// ERROR: webhook não configurado','#c0392b');return;}
+  if(loud)setSyncSt('// SYNCING...','var(--muted)');
+  const payload={source:'mba_senior',ts:new Date().toISOString(),streak:ST.streak,xp:ST.xp,level:getLevel(ST.xp).name,totalReviewed:ST.totalReviewed,quizBest:ST.quizBest,
+    cards:CARDS.map(c=>{const cs=ST.cards[c.id];return{id:c.id,cat:c.category,title:c.title,studied:cs.studied,reps:cs.reps,interval:cs.interval};})};
+  try{
+    const r=await fetch(ST.n8nUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    if(loud)r.ok?setSyncSt('// SYNC_OK ✓','#1a5c2a'):setSyncSt('// SYNC_ERROR','#c0392b');
+  }catch(e){if(loud)setSyncSt('// CONNECTION_FAILED','#c0392b');}
+}
+function setSyncSt(m,c){const el=document.getElementById('sync-st');if(el){el.textContent=m;el.style.color=c;}}
+
+// ─── SM-2 ─────────────────────────────────────────────
+function sm2(cs,r){
+  let{interval,ease,reps}=cs;
+  if(r===1){reps=0;interval=1;}
+  else if(r===2){interval=Math.max(1,Math.round(interval*1.2));ease=Math.max(1.3,ease-.15);reps++;}
+  else if(r===3){interval=reps===0?1:reps===1?3:Math.round(interval*ease);reps++;}
+  else{interval=reps===0?4:Math.round(interval*ease*1.3);ease=Math.min(3,ease+.1);reps++;}
+  return{interval,ease,reps,nextRev:Date.now()+interval*86400000,lastRev:Date.now()};
+}
+
+// ─── NAV ─────────────────────────────────────────────
+function navigate(sc){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-'+sc).classList.add('active');
+  const nb=document.getElementById('nav-'+sc);if(nb)nb.classList.add('active');
+  if(sc==='dash')renderDash();
+  if(sc==='study')startStudy();
+  if(sc==='review')startReview();
+  if(sc==='quiz')renderQuizIntro();
+}
+function goBack(to){navigate(to||'dash');}
+function goBackToStudy(){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-study').classList.add('active');
+  const nb=document.getElementById('nav-study');if(nb)nb.classList.add('active');
+}
+
+// ─── DASHBOARD ────────────────────────────────────────
+function updateXPBar(){
+  const lv=getLevel(ST.xp);
+  const next=XP_LEVELS[XP_LEVELS.indexOf(lv)+1];
+  const pct=next?Math.round((ST.xp-lv.min)/(next.min-lv.min)*100):100;
+  document.getElementById('xp-fill').style.width=pct+'%';
+  document.getElementById('xp-label').innerHTML=`<span>XP: ${ST.xp}${next?' / '+next.min:' MAX'}</span>`;
+  document.getElementById('level-name').textContent=lv.name;
+  document.getElementById('top-xp').textContent='XP:'+ST.xp;
+  document.getElementById('top-level').textContent='LVL:'+lv.name.slice(0,3);
+}
+
+function renderDash(){
+  document.getElementById('topDate')&&(document.getElementById('topDate').textContent=new Date().toLocaleDateString('pt-BR',{weekday:'short',day:'numeric',month:'short'}).toUpperCase());
+  const due=CARDS.filter(c=>ST.cards[c.id]?.nextRev<=Date.now()).length;
+  const mastered=CARDS.filter(c=>{const cs=ST.cards[c.id];return cs&&cs.reps>=3&&cs.interval>7;}).length;
+  document.getElementById('s-streak').textContent=ST.streak;
+  document.getElementById('s-mastered').textContent=mastered;
+  document.getElementById('s-due').textContent=due;
+  document.getElementById('s-quiz').textContent=ST.quizBest?ST.quizBest+'%':'--';
+  updateXPBar();
+
+  const aw=document.getElementById('alert-wrap');
+  let a='';
+  if(due>0)a+=`<div class="t-alert" onclick="navigate('review')"><div class="ta-icon">⚡</div><div class="ta-info"><div class="ta-t green">&gt; ${due} card${due>1?'s':''} para revisão</div><div class="ta-s">// SM-2 algorithm triggered</div></div><div class="ta-a">→</div></div>`;
+  a+=`<div class="t-alert gold" onclick="navigate('quiz')" style="cursor:pointer"><div class="ta-icon">🏆</div><div class="ta-info"><div class="ta-t gold">&gt; QUIZ_EXECUTIVO.exe</div><div class="ta-s">// ${ST.quizBest?'BEST: '+ST.quizBest+'%':'20 queries · all modules'}</div></div><div class="ta-a">→</div></div>`;
+  aw.innerHTML=a;
+
+  const cats={};
+  CARDS.forEach(c=>{if(!cats[c.category])cats[c.category]={cards:[],emoji:c.emoji,color:c.color};cats[c.category].cards.push(c);});
+  const cl=document.getElementById('cat-list');cl.innerHTML='';
+  Object.entries(cats).forEach(([name,d])=>{
+    const total=d.cards.length,studied=d.cards.filter(c=>ST.cards[c.id]?.studied).length,pct=Math.round(studied/total*100);
+    const el=document.createElement('div');
+    el.className='cat-item';el.style.setProperty('--c',d.color);
+    el.onclick=()=>{studyCat=name;navigate('study');};
+    el.innerHTML=`<div class="cat-em">${d.emoji}</div><div class="cat-info"><div class="cat-name">[${name.toUpperCase()}]</div><div class="cat-sub">${studied}/${total} loaded · ${pct}% complete</div><div class="bar"><div class="bar-fill" style="width:${pct}%;background:${d.color}"></div></div></div><div class="pct${pct===100?' done':''}">${pct}%</div>`;
+    cl.appendChild(el);
+  });
+}
+
+// ─── STUDY ────────────────────────────────────────────
+function startStudy(){
+  studyQ=studyCat?CARDS.filter(c=>c.category===studyCat):[...CARDS].sort((a,b)=>(ST.cards[a.id]?.studied?1:0)-(ST.cards[b.id]?.studied?1:0));
+  studyIdx=0;renderStudyCard();
+}
+function renderStudyCard(){
+  const card=studyQ[studyIdx];if(!card)return;
+  document.getElementById('study-prog').textContent=`${studyIdx+1}/${studyQ.length}`;
+  document.getElementById('study-card-wrap').innerHTML=`
+    <div class="study-card">
+      <div class="sc-top"><span class="sc-mentor">${card.mentor}</span><span class="sc-cat">${card.emoji} ${card.category.toUpperCase()}</span></div>
+      <div class="sc-body">
+        <div class="sc-title">&gt; ${card.title}</div>
+        <div class="sc-quote">${card.quote}<cite>— ${card.quoteAuthor}</cite></div>
+        <div class="sc-content">${card.content.split('\n\n').map(p=>`<p>${p.trim()}</p>`).join('')}</div>
+      </div>
+    </div>`;
+  document.getElementById('study-kp').innerHTML=`<div class="kp-wrap"><div class="kp-label">KEY_POINTS</div>${card.keyPoints.map(p=>`<div class="kp"><span class="kp-dot">▸</span>${p}</div>`).join('')}</div>`;
+  document.getElementById('study-apply').innerHTML=`<div class="apply-box"><div class="apply-label">EXECUTE_NOW</div><div class="apply-text">${card.apply}</div></div>`;
+  document.getElementById('btn-next').textContent=studyIdx<studyQ.length-1?'NEXT >':'DONE ✓';
+  if(!ST.cards[card.id].studied){ST.cards[card.id].studied=true;updateStreak();addXP(50);saveST();}
+  document.getElementById('screen-study').scrollTop=0;
+}
+function nextCard(){
+  if(studyIdx<studyQ.length-1){studyIdx++;renderStudyCard();}
+  else{studyCat=null;toast('// MODULE_COMPLETE +100XP');addXP(100);navigate('dash');}
+}
+
+// ─── TEACH ────────────────────────────────────────────
+function goTeach(){
+  const card=studyQ[studyIdx];if(!card)return;
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('screen-teach').classList.add('active');
+  document.getElementById('teach-q').textContent=card.question;
+  const ta=document.getElementById('teach-ta');
+  ta.value=ST.cards[card.id]?.explanation||'';updateWC();
+  document.getElementById('fb-box').classList.remove('show');
+  ta.oninput=updateWC;
+}
+function updateWC(){const v=document.getElementById('teach-ta').value.trim();document.getElementById('wc').textContent='// '+( v?v.split(/\s+/).length:0)+' words';}
+function clearTeach(){document.getElementById('teach-ta').value='';updateWC();document.getElementById('fb-box').classList.remove('show');}
+function submitTeach(){
+  const text=document.getElementById('teach-ta').value.trim();
+  const wds=text?text.split(/\s+/).length:0;
+  if(wds<10){toast('// ERROR: minimum 10 words required');return;}
+  const card=studyQ[studyIdx];
+  if(card){ST.cards[card.id].explanation=text;saveST();}
+  let score=0;const tl=text.toLowerCase();
+  score+=wds>=60?30:wds>=35?20:10;
+  if(card){let f=0;card.keyPoints.forEach(kp=>{const kws=kp.toLowerCase().split(' ').filter(w=>w.length>4);if(kws.some(k=>tl.includes(k)))f++;});score+=Math.round(f/card.keyPoints.length*45);}
+  if(/porque|pois|portanto|logo|portanto|significa|representa|desta forma/.test(tl))score+=10;
+  if(/exemplo|por exemplo|como|na prática|real|mercado|empresa|caso|dados/.test(tl))score+=15;
+  score=Math.min(100,score);
+  const xpEarned=score>=80?150:score>=60?100:score>=40?50:20;
+  addXP(xpEarned);
+  const tips=['// Cite dados e benchmarks de mercado para fortalecer o argumento.','// Use a estrutura: contexto → problema → solução → resultado.','// Conecte ao framework estudado com nome e autor.','// Qual empresa é o melhor exemplo desse conceito? Cite e explique.'];
+  const levels=[[85,'💡 A+','BOARD APPROVED — Análise de nível executivo sênior.'],[65,'✅ B+','APPROVED — Boa compreensão. Adicione dados e exemplos de mercado.'],[45,'📝 C+','CONDITIONAL — Revise os key points e reescreva com mais precisão.'],[0,'⚡ RETRY','REJECTED — Releia o card e apresente novamente ao board.']];
+  const [,emoji,txt]=levels.find(([min])=>score>=min);
+  document.getElementById('fb-score').textContent=`${emoji} ${score}/100 +${xpEarned}XP`;
+  document.getElementById('fb-text').textContent=txt;
+  document.getElementById('fb-tip').textContent=tips[Math.floor(Math.random()*tips.length)];
+  document.getElementById('fb-box').classList.add('show');
+  document.getElementById('fb-box').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ─── REVIEW ──────────────────────────────────────────
+function startReview(){
+  revQ=CARDS.filter(c=>ST.cards[c.id]?.nextRev<=Date.now()).sort((a,b)=>ST.cards[a.id].nextRev-ST.cards[b.id].nextRev);
+  revIdx=0;flipped=false;
+  document.getElementById('rev-done').classList.remove('show');
+  document.getElementById('flip-wrap').style.display='block';
+  document.getElementById('rating-area').classList.remove('show');
+  if(!revQ.length){showRevDone();return;}
+  renderRevCard();
+}
+function renderRevCard(){
+  const card=revQ[revIdx];if(!card){showRevDone();return;}
+  flipped=false;
+  document.getElementById('flip-wrap').classList.remove('flipped');
+  document.getElementById('rating-area').classList.remove('show');
+  document.querySelectorAll('.rbt').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('rev-prog').textContent=`${revIdx+1}/${revQ.length}`;
+  document.getElementById('rev-q').textContent=card.question;
+  const cs=ST.cards[card.id];
+  document.getElementById('rev-ans').innerHTML=`
+    <div style="font-size:9px;color:var(--muted);margin-bottom:11px">${card.emoji} ${card.category.toUpperCase()} · ${card.mentor}</div>
+    <div style="font-size:11px;color:var(--g2);margin-bottom:12px;padding:9px 11px;background:rgba(0,255,65,.04);border-left:2px solid var(--g3);line-height:1.6;font-style:italic">${card.quote}</div>
+    <div style="font-size:9px;color:var(--g);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">// KEY_POINTS</div>
+    ${card.keyPoints.map(p=>`<div style="display:flex;gap:7px;margin-bottom:7px;font-size:11px;line-height:1.5"><span style="color:var(--g);flex-shrink:0">▸</span>${p}</div>`).join('')}
+    <div style="margin-top:10px;font-size:9px;color:var(--muted)">reps:${cs.reps} · interval:${cs.interval}d · next:${cs.nextRev?new Date(cs.nextRev).toLocaleDateString('pt-BR'):'now'}</div>`;
+}
+function flipCard(){if(flipped)return;flipped=true;document.getElementById('flip-wrap').classList.add('flipped');setTimeout(()=>document.getElementById('rating-area').classList.add('show'),380);}
+function rateCard(r){
+  const card=revQ[revIdx];if(!card)return;
+  const upd=sm2(ST.cards[card.id],r);
+  ST.cards[card.id]={...ST.cards[card.id],...upd};
+  ST.totalReviewed++;
+  const xpMap={1:5,2:15,3:30,4:50};addXP(xpMap[r]||10);
+  updateStreak();saveST();
+  document.querySelectorAll('.rbt').forEach(b=>b.classList.remove('sel'));
+  document.querySelector(`.rbt.r${r}`)?.classList.add('sel');
+  setTimeout(()=>{revIdx++;if(revIdx>=revQ.length)showRevDone();else renderRevCard();},380);
+}
+function showRevDone(){
+  document.getElementById('flip-wrap').style.display='none';
+  document.getElementById('rating-area').classList.remove('show');
+  document.getElementById('rev-done').classList.add('show');
+  addXP(100);toast('// REVIEW_COMPLETE');updateStreak();saveST();
+}
+
+// ═══════════════════════════════════════════════════
+//                  QUIZ ENGINE
+// ═══════════════════════════════════════════════════
+function renderQuizIntro(){
+  document.getElementById('quiz-intro').style.display='flex';
+  document.getElementById('quiz-body').classList.remove('show');
+  document.getElementById('quiz-result').classList.remove('show');
+  document.getElementById('quiz-meta').textContent='20 queries';
+  const ls=document.getElementById('quiz-last-score');
+  if(ST.quizBest){ls.style.display='block';ls.textContent=`// BEST_SCORE: ${ST.quizBest}% · runs:${ST.quizHistory.length}`;}
+  else ls.style.display='none';
+}
+
+function startQuiz(){
+  quizOrder=[...Array(QUIZ.length).keys()].sort(()=>Math.random()-.5).slice(0,20);
+  quizIdx=0;quizCorrect=0;quizWrong=0;quizCatRes={};
+  document.getElementById('quiz-intro').style.display='none';
+  document.getElementById('quiz-body').classList.add('show');
+  document.getElementById('quiz-result').classList.remove('show');
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const qi=QUIZ[quizOrder[quizIdx]];
+  const total=quizOrder.length,pct=Math.round(quizIdx/total*100);
+  document.getElementById('q-num').textContent=`Q${quizIdx+1}/${total}`;
+  document.getElementById('q-score-live').innerHTML=`<span style="color:var(--g)">✓${quizCorrect}</span> <span style="color:var(--red)">✗${quizWrong}</span>`;
+  document.getElementById('q-pfill').style.width=pct+'%';
+  document.getElementById('quiz-meta').textContent=`${quizIdx+1}/20`;
+  document.getElementById('q-cat').textContent=qi.cat.toUpperCase();
+  document.getElementById('q-text').textContent=qi.q;
+  document.getElementById('q-feedback').classList.remove('show','cfb','wfb');
+  document.getElementById('btn-next-q').classList.remove('show');
+  const keys=['A','B','C','D'];
+  document.getElementById('q-opts').innerHTML=qi.opts.map((opt,i)=>`
+    <div class="q-opt" id="opt-${i}" onclick="selectOpt(${i})">
+      <div class="q-opt-key">${keys[i]}</div>
+      <div>${opt}</div>
+    </div>`).join('');
+  document.getElementById('screen-quiz').scrollTop=0;
+}
+
+function selectOpt(idx){
+  const qi=QUIZ[quizOrder[quizIdx]];
+  const opts=document.querySelectorAll('.q-opt');
+  opts.forEach(o=>o.classList.add('disabled'));
+  opts[idx].classList.add('selected');
+  const correct=idx===qi.ans;
+  if(correct){opts[idx].classList.remove('selected');opts[idx].classList.add('correct');quizCorrect++;}
+  else{opts[idx].classList.remove('selected');opts[idx].classList.add('wrong');opts[qi.ans].classList.add('correct');quizWrong++;}
+  if(!quizCatRes[qi.cat])quizCatRes[qi.cat]={c:0,w:0};
+  correct?quizCatRes[qi.cat].c++:quizCatRes[qi.cat].w++;
+  const fb=document.getElementById('q-feedback');
+  fb.className='q-feedback show '+(correct?'cfb':'wfb');
+  fb.innerHTML=`<b class="${correct?'c':'w'}">${correct?'// CORRECT':'// WRONG'}</b>${qi.exp}`;
+  document.getElementById('btn-next-q').classList.add('show');
+  document.getElementById('q-score-live').innerHTML=`<span style="color:var(--g)">✓${quizCorrect}</span> <span style="color:var(--red)">✗${quizWrong}</span>`;
+  fb.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function nextQuestion(){
+  quizIdx++;
+  if(quizIdx>=quizOrder.length)showQuizResult();
+  else renderQuestion();
+}
+
+function showQuizResult(){
+  document.getElementById('quiz-body').classList.remove('show');
+  const res=document.getElementById('quiz-result');res.classList.add('show');
+  const pct=Math.round(quizCorrect/quizOrder.length*100);
+  const xpEarned=pct>=80?500:pct>=60?300:pct>=40?150:50;
+  addXP(xpEarned);
+  if(pct>ST.quizBest)ST.quizBest=pct;
+  ST.quizHistory.push({date:new Date().toISOString(),pct,correct:quizCorrect,total:quizOrder.length});
+  saveST();
+  document.getElementById('qr-n').textContent=pct+'%';
+  const circ=document.getElementById('qr-circle');
+  const circumference=2*Math.PI*45;
+  circ.style.strokeDasharray=circumference;
+  circ.style.strokeDashoffset=circumference;
+  setTimeout(()=>{circ.style.strokeDashoffset=circumference*(1-pct/100);},100);
+  const levels=[
+    [90,'// EXECUTIVE_APPROVED','Análise de nível C-Suite. Você pensa estrategicamente.'],
+    [70,'// MANAGER_APPROVED','Sólido. Refine os pontos fracos para alcançar o próximo nível.'],
+    [50,'// ANALYST_APPROVED','Fundação construída. Estude os módulos onde errou e execute novamente.'],
+    [0,'// RETRY_REQUIRED','Continue estudando os cards. Cada erro é dado de aprendizado.'],
+  ];
+  const [,h,msg]=levels.find(([min])=>pct>=min);
+  document.getElementById('qr-h').textContent=h;
+  document.getElementById('qr-msg').textContent=msg+` (+${xpEarned}XP)`;
+  const catColors={'Estratégia':'#00ff41','Marketing':'#41b8ff','Finanças':'#ffd700','Liderança':'#ff4141','Operações':'#00cc33','Empreendedorismo':'#9b72d4','Negociação':'#00cc33','Inovação':'#41b8ff'};
+  document.getElementById('qr-bd').innerHTML=`<div class="qr-bd-title">BREAKDOWN_BY_MODULE</div>`+
+    Object.entries(quizCatRes).map(([cat,r])=>{
+      const dots=[...Array(r.c).fill('<span class="qr-dot c"></span>'),...Array(r.w).fill('<span class="qr-dot w"></span>')].join('');
+      return `<div class="qr-bd-row"><span style="color:${catColors[cat]||'var(--text)'}">${cat.toUpperCase()}</span><div>${dots}</div></div>`;
+    }).join('');
+  document.getElementById('quiz-meta').textContent=pct+'%';
+}
+
+function resetQuiz(){
+  document.getElementById('quiz-result').classList.remove('show');
+  renderQuizIntro();
+}
+
+// ─── SETTINGS ────────────────────────────────────────
+function saveSettings(){ST.n8nUrl=document.getElementById('n8n-url').value.trim();saveST();setSyncSt('// CONFIG_SAVED ✓','var(--g)');}
+function syncNow(){syncN8n(true);}
+function resetAll(){if(!confirm('RESET ALL DATA? This cannot be undone.'))return;ST={cards:{},streak:0,lastDate:null,n8nUrl:ST.n8nUrl,totalReviewed:0,xp:0,quizBest:0,quizHistory:[]};loadST();saveST();navigate('dash');toast('// DATA_RESET_COMPLETE');}
+
+// ─── UTILS ───────────────────────────────────────────
+function updateStreak(){const today=new Date().toDateString();if(ST.lastDate===today)return;const yest=new Date(Date.now()-86400000).toDateString();ST.streak=ST.lastDate===yest?ST.streak+1:1;ST.lastDate=today;}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+
+// ─── INIT ─────────────────────────────────────────────
+loadST();
+const n8nIn=document.getElementById('n8n-url');
+if(n8nIn&&ST.n8nUrl)n8nIn.value=ST.n8nUrl;
+renderDash();
+</script>
+</body>
+</html>
